@@ -42,6 +42,10 @@ interface TailoredStore {
   // Style preferences
   stylePreferences: string[];
   toggleStylePreference: (pref: string) => void;
+
+  // Units
+  unit: 'cm' | 'in';
+  setUnit: (unit: 'cm' | 'in') => void;
 }
 
 const useTailoredStore = create<TailoredStore>()(
@@ -86,6 +90,10 @@ const useTailoredStore = create<TailoredStore>()(
             ? state.stylePreferences.filter((p) => p !== pref)
             : [...state.stylePreferences, pref],
         })),
+
+      // Units
+      unit: 'cm',
+      setUnit: (unit) => set({ unit }),
     }),
     {
       name: "tailored-storage",
@@ -106,6 +114,7 @@ const useTailoredStore = create<TailoredStore>()(
             ...(p.measurements ?? {}),
           },
           recentImports: p.recentImports ?? [],
+          unit: p.unit ?? 'cm',
         };
       },
     }

@@ -44,10 +44,10 @@ export default function ProfileScreen() {
   };
 
   const settingsItems = [
-    { icon: Bell, label: 'Notifications', id: 'notifications' },
-    { icon: Shield, label: 'Privacy', id: 'privacy' },
-    { icon: Ruler, label: 'Units (cm/in)', id: 'units' },
-    { icon: Info, label: 'About Tailored', id: 'about' },
+    { icon: Bell, label: 'Notifications', id: 'notifications', route: '/settings-notifications' },
+    { icon: Shield, label: 'Privacy', id: 'privacy', route: '/settings-privacy' },
+    { icon: Ruler, label: 'Units (cm/in)', id: 'units', route: '/settings-units' },
+    { icon: Info, label: 'About Tailored', id: 'about', route: '/settings-about' },
   ];
 
   return (
@@ -272,6 +272,7 @@ export default function ProfileScreen() {
                   <Pressable
                     key={item.id}
                     testID={`settings-${item.id}`}
+                    onPress={() => { Haptics.selectionAsync(); router.push(item.route as never); }}
                     style={({ pressed }) => ({
                       opacity: pressed ? 0.7 : 1,
                       flexDirection: 'row',

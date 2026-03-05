@@ -54,6 +54,10 @@ function RootLayoutNav() {
           <Stack.Screen name="body-scan" options={{ headerShown: false, animation: 'slide_from_bottom' }} />
           <Stack.Screen name="measurements-edit" options={{ presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' }} />
           <Stack.Screen name="profile-edit" options={{ presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="settings-notifications" options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen name="settings-privacy" options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen name="settings-units" options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen name="settings-about" options={{ headerShown: false, animation: 'slide_from_right' }} />
         </Stack.Protected>
 
         <Stack.Protected guard={!session?.user}>
