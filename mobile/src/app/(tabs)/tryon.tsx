@@ -17,17 +17,13 @@ import * as FileSystem from 'expo-file-system';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
-import { Link2, Camera, ChevronRight, ImageIcon, X } from 'lucide-react-native';
-import { ClothingItem } from '@/lib/state/tailored-store';
+import { Link2, Camera, ImageIcon, X } from 'lucide-react-native';
+import { ClothingItem, ImportedPhoto } from '@/lib/state/tailored-store';
 import { TextInput } from 'react-native';
 import { DimensionValue } from 'react-native';
 import { useRouter } from 'expo-router';
 import { api } from '@/lib/api/api';
 
-interface ImportedPhoto {
-  uri: string;
-  name: string;
-}
 
 interface MeasurementAnalysis {
   chest: number;
@@ -71,6 +67,9 @@ export default function TryOnScreen() {
   const savedItems = useTailoredStore((s) => s.savedItems);
   const height = useTailoredStore((s) => s.height);
   const setProfile = useTailoredStore((s) => s.setProfile);
+  const recentImports = useTailoredStore((s) => s.recentImports);
+  const addImportedPhoto = useTailoredStore((s) => s.addImportedPhoto);
+  const removeImportedPhoto = useTailoredStore((s) => s.removeImportedPhoto);
   const router = useRouter();
 
   const activeItem: ClothingItem | null = savedItems[0] ?? null;
@@ -99,10 +98,13 @@ export default function TryOnScreen() {
 
     if (!result.canceled && result.assets.length > 0) {
       const newPhotos: ImportedPhoto[] = result.assets.map((asset, i) => ({
+        id: `${Date.now()}-${i}`,
         uri: asset.uri,
-        name: asset.fileName ?? `Clothing item ${importedPhotos.length + i + 1}`,
+        name: asset.fileName ?? `Photo ${i + 1}`,
+        importedAt: Date.now(),
       }));
       setImportedPhotos((prev) => [...newPhotos, ...prev]);
+      newPhotos.forEach((p) => addImportedPhoto(p));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
   };
@@ -435,57 +437,71 @@ export default function TryOnScreen() {
                 </Animated.View>
               )}
 
-              {/* Recent imports */}
-              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 16, color: '#F5F0E8', marginBottom: 16 }}>
-                Recent Imports
-              </Text>
-              {savedItems.slice(0, 3).map((item) => (
-                <Pressable
-                  key={item.id}
-                  testID={`recent-import-${item.id}`}
-                  style={({ pressed }) => ({
-                    opacity: pressed ? 0.8 : 1,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    backgroundColor: '#161616',
-                    borderRadius: 14,
-                    padding: 14,
-                    marginBottom: 10,
-                    borderWidth: 1,
-                    borderColor: '#2A2A2A',
+              {/* Recent Imports */}
+              {recentImports.length > 0 && (
+                <View>
+                  <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 16, color: '#F5F0E8', marginBottom: 16 }}>
+                    Recent Imports
+                  </Text>
+                  {recentImports.slice(0, 5).map((photo) => {
+                    const date = new Date(photo.importedAt);
+                    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    return (
+                      <View
+                        key={photo.id}
+                        testID={`recent-import-${photo.id}`}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          backgroundColor: '#161616',
+                          borderRadius: 14,
+                          padding: 10,
+                          marginBottom: 10,
+                          borderWidth: 1,
+                          borderColor: '#2A2A2A',
+                        }}
+                      >
+                        <View style={{ width: 52, height: 52, borderRadius: 10, overflow: 'hidden', marginRight: 14, borderWidth: 1, borderColor: '#2A2A2A' }}>
+                          <Image
+                            source={{ uri: photo.uri }}
+                            style={{ width: '100%', height: '100%' }}
+                            resizeMode="cover"
+                          />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: '#F5F0E8', marginBottom: 2 }} numberOfLines={1}>
+                            {photo.name}
+                          </Text>
+                          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: '#A89880' }}>
+                            {dateStr} · {timeStr}
+                          </Text>
+                        </View>
+                        <Pressable
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            removeImportedPhoto(photo.id);
+                          }}
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: 14,
+                            backgroundColor: 'rgba(255,255,255,0.05)',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderWidth: 1,
+                            borderColor: '#2A2A2A',
+                            marginLeft: 8,
+                          }}
+                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        >
+                          <X size={12} color="#A89880" strokeWidth={2} />
+                        </Pressable>
+                      </View>
+                    );
                   })}
-                >
-                  <LinearGradient
-                    colors={['#2A2A2A', '#1E1E1E']}
-                    style={{ width: 52, height: 52, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginRight: 14 }}
-                  >
-                    <Text style={{ fontSize: 24 }}>{emojiMap[item.category] ?? '👕'}</Text>
-                  </LinearGradient>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: '#F5F0E8', marginBottom: 2 }} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                    <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: '#A89880' }}>
-                      {item.brand} · {item.price}
-                    </Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <View style={{
-                      paddingHorizontal: 10,
-                      paddingVertical: 5,
-                      borderRadius: 20,
-                      backgroundColor: `${fitScoreColor(item.fitScore)}22`,
-                      borderWidth: 1,
-                      borderColor: `${fitScoreColor(item.fitScore)}44`,
-                    }}>
-                      <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 11, color: fitScoreColor(item.fitScore) }}>
-                        View Fit
-                      </Text>
-                    </View>
-                    <ChevronRight size={14} color="#A89880" />
-                  </View>
-                </Pressable>
-              ))}
+                </View>
+              )}
             </Animated.View>
           </ScrollView>
         )}

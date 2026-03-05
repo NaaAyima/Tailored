@@ -12,6 +12,13 @@ export interface ClothingItem {
   price: string;
 }
 
+export interface ImportedPhoto {
+  id: string;
+  uri: string;
+  name: string;
+  importedAt: number; // timestamp
+}
+
 interface TailoredStore {
   // User profile
   userName: string;
@@ -26,6 +33,11 @@ interface TailoredStore {
   // Clothing items
   savedItems: ClothingItem[];
   addItem: (item: ClothingItem) => void;
+
+  // Recent imported photos (persisted)
+  recentImports: ImportedPhoto[];
+  addImportedPhoto: (photo: ImportedPhoto) => void;
+  removeImportedPhoto: (id: string) => void;
 
   // Style preferences
   stylePreferences: string[];
@@ -56,6 +68,16 @@ const useTailoredStore = create<TailoredStore>()(
       ],
       addItem: (item) => set((state) => ({ savedItems: [...state.savedItems, item] })),
 
+      // Recent imported photos
+      recentImports: [],
+      addImportedPhoto: (photo) =>
+        set((state) => ({
+          // Keep max 20, newest first
+          recentImports: [photo, ...state.recentImports.filter((p) => p.id !== photo.id)].slice(0, 20),
+        })),
+      removeImportedPhoto: (id) =>
+        set((state) => ({ recentImports: state.recentImports.filter((p) => p.id !== id) })),
+
       // Style preferences
       stylePreferences: ["Minimalist"],
       toggleStylePreference: (pref) =>
@@ -83,6 +105,7 @@ const useTailoredStore = create<TailoredStore>()(
             inseam: 0,
             ...(p.measurements ?? {}),
           },
+          recentImports: p.recentImports ?? [],
         };
       },
     }
