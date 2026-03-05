@@ -56,3 +56,34 @@ model Verification {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
+
+model Customer {
+  id           String    @id @default(cuid())
+  userId       String    // The tailor's user ID (auth user)
+  name         String
+  phone        String?
+  email        String?
+  notes        String?
+  // Body measurements (in cm)
+  chest        Float?
+  waist        Float?
+  hips         Float?
+  shoulder     Float?
+  inseam       Float?
+  neckSize     Float?
+  sleeveLength Float?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  garments     CustomerGarment[]
+}
+
+model CustomerGarment {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type        String   // "blouse", "pants", "dress", "shirt", "skirt", "suit", "other"
+  description String?
+  status      String   @default("pending") // "pending", "in_progress", "completed"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

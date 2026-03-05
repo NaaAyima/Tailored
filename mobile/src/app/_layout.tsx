@@ -59,6 +59,10 @@ function RootLayoutNav() {
           <Stack.Screen name="settings-units" options={{ headerShown: false, animation: 'slide_from_right' }} />
           <Stack.Screen name="settings-about" options={{ headerShown: false, animation: 'slide_from_right' }} />
           <Stack.Screen name="garment-preferences" options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen name="customer-add" options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen name="customer-edit" options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen name="customer-detail" options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen name="customer-add-garment" options={{ headerShown: false, animation: 'slide_from_right' }} />
         </Stack.Protected>
 
         <Stack.Protected guard={!session?.user}>

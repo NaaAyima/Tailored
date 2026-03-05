@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Home, Shirt, SlidersHorizontal, User } from 'lucide-react-native';
+import { Home, Shirt, SlidersHorizontal, User, Users } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -58,6 +58,15 @@ export default function TabLayout() {
           title: 'Profile',
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <User size={size - 2} color={color} strokeWidth={1.5} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="customers"
+        options={{
+          title: 'Customers',
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Users size={size - 2} color={color} strokeWidth={1.5} />
           ),
         }}
       />
