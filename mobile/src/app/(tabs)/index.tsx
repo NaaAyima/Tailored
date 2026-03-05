@@ -125,9 +125,6 @@ function RecommendedCard({ item, onPress }: { item: ClothingItem; onPress: () =>
       <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 12, color: '#F5F0E8', marginBottom: 4 }} numberOfLines={2}>
         {item.name}
       </Text>
-      <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 13, color: '#C9A96E' }}>
-        {item.price}
-      </Text>
     </Pressable>
   );
 }
