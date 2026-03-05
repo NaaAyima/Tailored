@@ -12,7 +12,7 @@ import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
-import { Bell } from 'lucide-react-native';
+import { Bell, Shirt } from 'lucide-react-native';
 import { ClothingItem } from '@/lib/state/tailored-store';
 
 function fitScoreColor(score: number): string {
@@ -145,7 +145,11 @@ export default function DiscoverScreen() {
     router.push({ pathname: '/fit-analysis', params: { itemId: item.id } });
   };
 
-  const avgScore = Math.round(savedItems.reduce((sum, i) => sum + i.fitScore, 0) / savedItems.length);
+  const avgScore = savedItems.length > 0
+    ? Math.round(savedItems.reduce((sum, i) => sum + i.fitScore, 0) / savedItems.length)
+    : 0;
+
+  const isEmpty = savedItems.length === 0;
 
   return (
     <View style={{ flex: 1, backgroundColor: '#0A0A0A' }} testID="discover-screen">
@@ -164,6 +168,10 @@ export default function DiscoverScreen() {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Pressable
                 testID="notifications-button"
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push('/settings-notifications');
+                }}
                 style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: '#161616', borderWidth: 1, borderColor: '#2A2A2A', alignItems: 'center', justifyContent: 'center' }}
               >
                 <Bell size={18} color="#A89880" strokeWidth={1.5} />
@@ -197,61 +205,124 @@ export default function DiscoverScreen() {
                 </Text>
               </View>
               <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: '#A89880', lineHeight: 20 }}>
-                Your wardrobe is well-fitted for your body type.{' '}
-                {savedItems.filter(i => i.fitScore >= 80).length} of {savedItems.length} items score above 80%.
+                {isEmpty
+                  ? 'Import clothing to see your personalised fit score'
+                  : `Your wardrobe is well-fitted for your body type. ${savedItems.filter(i => i.fitScore >= 80).length} of ${savedItems.length} items score above 80%.`}
               </Text>
             </LinearGradient>
           </Animated.View>
 
-          {/* Recent Tries */}
-          <Animated.View entering={nativeEntering(FadeInDown.delay(200).duration(600))} style={{ marginBottom: 32 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, marginBottom: 16 }}>
-              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 18, color: '#F5F0E8' }}>
-                Recent Tries
-              </Text>
-              <Pressable testID="see-all-recent">
-                <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: '#C9A96E' }}>
-                  See all
-                </Text>
-              </Pressable>
-            </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingLeft: 24, paddingRight: 12 }}
-              style={{ flexGrow: 0 }}
+          {isEmpty ? (
+            /* Empty state */
+            <Animated.View
+              entering={nativeEntering(FadeInDown.delay(200).duration(600))}
+              testID="empty-state"
+              style={{ paddingHorizontal: 24, alignItems: 'center', paddingTop: 16, paddingBottom: 24 }}
             >
-              {savedItems.slice(0, 4).map((item) => (
-                <ClothingCard key={item.id} item={item} onPress={() => handleItemPress(item)} />
-              ))}
-            </ScrollView>
-          </Animated.View>
-
-          {/* Recommended For You */}
-          <Animated.View entering={nativeEntering(FadeInDown.delay(300).duration(600))} style={{ paddingHorizontal: 24 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 18, color: '#F5F0E8' }}>
-                Recommended
+              <View style={{
+                width: 88,
+                height: 88,
+                borderRadius: 44,
+                backgroundColor: 'rgba(201,169,110,0.1)',
+                borderWidth: 1,
+                borderColor: 'rgba(201,169,110,0.25)',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 20,
+              }}>
+                <Shirt size={38} color="#C9A96E" strokeWidth={1.5} />
+              </View>
+              <Text style={{ fontFamily: 'CormorantGaramond_700Bold', fontSize: 24, color: '#F5F0E8', marginBottom: 10, textAlign: 'center' }}>
+                Your wardrobe is empty
               </Text>
-              <Pressable testID="see-all-recommended">
-                <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: '#C9A96E' }}>
-                  See all
+              <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 14, color: '#A89880', textAlign: 'center', lineHeight: 22, marginBottom: 28, maxWidth: 280 }}>
+                Import clothing from the Try On tab to see your fit scores here
+              </Text>
+              <Pressable
+                testID="go-to-tryon-button"
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push('/(tabs)/tryon');
+                }}
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.8 : 1,
+                  paddingHorizontal: 28,
+                  paddingVertical: 14,
+                  borderRadius: 27,
+                  borderWidth: 1,
+                  borderColor: '#C9A96E',
+                })}
+              >
+                <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#C9A96E', letterSpacing: 0.5 }}>
+                  Go to Try On
                 </Text>
               </Pressable>
-            </View>
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              <View style={{ flex: 1 }}>
-                {savedItems.filter((_, i) => i % 2 === 0).map((item) => (
-                  <RecommendedCard key={item.id} item={item} onPress={() => handleItemPress(item)} />
-                ))}
-              </View>
-              <View style={{ flex: 1 }}>
-                {savedItems.filter((_, i) => i % 2 !== 0).map((item) => (
-                  <RecommendedCard key={item.id} item={item} onPress={() => handleItemPress(item)} />
-                ))}
-              </View>
-            </View>
-          </Animated.View>
+            </Animated.View>
+          ) : (
+            <>
+              {/* Recent Tries */}
+              <Animated.View entering={nativeEntering(FadeInDown.delay(200).duration(600))} style={{ marginBottom: 32 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, marginBottom: 16 }}>
+                  <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 18, color: '#F5F0E8' }}>
+                    Recent Tries
+                  </Text>
+                  <Pressable
+                    testID="see-all-recent"
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      router.push('/(tabs)/tryon');
+                    }}
+                  >
+                    <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: '#C9A96E' }}>
+                      See all
+                    </Text>
+                  </Pressable>
+                </View>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingLeft: 24, paddingRight: 12 }}
+                  style={{ flexGrow: 0 }}
+                >
+                  {savedItems.slice(0, 4).map((item) => (
+                    <ClothingCard key={item.id} item={item} onPress={() => handleItemPress(item)} />
+                  ))}
+                </ScrollView>
+              </Animated.View>
+
+              {/* Recommended For You */}
+              <Animated.View entering={nativeEntering(FadeInDown.delay(300).duration(600))} style={{ paddingHorizontal: 24 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 18, color: '#F5F0E8' }}>
+                    Recommended
+                  </Text>
+                  <Pressable
+                    testID="see-all-recommended"
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      router.push('/(tabs)/tryon');
+                    }}
+                  >
+                    <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: '#C9A96E' }}>
+                      See all
+                    </Text>
+                  </Pressable>
+                </View>
+                <View style={{ flexDirection: 'row', gap: 12 }}>
+                  <View style={{ flex: 1 }}>
+                    {savedItems.filter((_, i) => i % 2 === 0).map((item) => (
+                      <RecommendedCard key={item.id} item={item} onPress={() => handleItemPress(item)} />
+                    ))}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    {savedItems.filter((_, i) => i % 2 !== 0).map((item) => (
+                      <RecommendedCard key={item.id} item={item} onPress={() => handleItemPress(item)} />
+                    ))}
+                  </View>
+                </View>
+              </Animated.View>
+            </>
+          )}
         </ScrollView>
       </SafeAreaView>
     </View>

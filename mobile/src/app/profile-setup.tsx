@@ -77,14 +77,18 @@ export default function ProfileSetupScreen() {
       setStep(step + 1);
     } else {
       // Save and complete
+      const toStoreCm = (val: string) => {
+        const num = parseFloat(val) || 0;
+        return unit === 'in' ? Math.round(num * 2.54) : Math.round(num);
+      };
       setProfile({
         height: parseFloat(height) || 175,
         weight: parseFloat(weight) || 70,
         bodyType: detectedBodyType,
         measurements: {
-          chest: parseFloat(chest) || 0,
-          waist: parseFloat(waist) || 0,
-          hips: parseFloat(hips) || 0,
+          chest: toStoreCm(chest),
+          waist: toStoreCm(waist),
+          hips: toStoreCm(hips),
           shoulder: 0,
           inseam: 0,
         },
@@ -100,6 +104,22 @@ export default function ProfileSetupScreen() {
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (step > 0) setStep(step - 1);
+  };
+
+  const handleUnitToggle = (newUnit: Unit) => {
+    Haptics.selectionAsync();
+    if (newUnit === unit) return;
+    const convert = (val: string): string => {
+      const num = parseFloat(val);
+      if (isNaN(num)) return val;
+      return newUnit === 'in'
+        ? (num / 2.54).toFixed(1)
+        : (num * 2.54).toFixed(1);
+    };
+    if (chest) setChest(convert(chest));
+    if (waist) setWaist(convert(waist));
+    if (hips) setHips(convert(hips));
+    setUnit(newUnit);
   };
 
   const canProceed = step === 0
@@ -286,7 +306,7 @@ export default function ProfileSetupScreen() {
                   {(['cm', 'in'] as Unit[]).map((u) => (
                     <Pressable
                       key={u}
-                      onPress={() => setUnit(u)}
+                      onPress={() => handleUnitToggle(u)}
                       style={{
                         paddingHorizontal: 20,
                         paddingVertical: 8,
@@ -371,34 +391,43 @@ export default function ProfileSetupScreen() {
 
                 {/* Body silhouette */}
                 <View style={{ alignItems: 'center', marginBottom: 36 }}>
-                  <LinearGradient
-                    colors={['#1E1E1E', '#2A2A2A']}
-                    style={{
-                      width: 140,
-                      height: 220,
-                      borderRadius: 70,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderWidth: 1,
-                      borderColor: '#C9A96E',
-                    }}
-                  >
-                    <View style={{ alignItems: 'center' }}>
-                      {/* Head */}
-                      <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#C9A96E', opacity: 0.6, marginBottom: 6 }} />
-                      {/* Shoulders */}
-                      <View style={{ width: 80, height: 16, borderRadius: 8, backgroundColor: '#C9A96E', opacity: 0.4, marginBottom: 4 }} />
-                      {/* Torso */}
-                      <View style={{ width: 56, height: 50, borderRadius: 6, backgroundColor: '#C9A96E', opacity: 0.3, marginBottom: 4 }} />
-                      {/* Hips */}
-                      <View style={{ width: 72, height: 20, borderRadius: 8, backgroundColor: '#C9A96E', opacity: 0.35, marginBottom: 4 }} />
-                      {/* Legs */}
-                      <View style={{ flexDirection: 'row', gap: 6 }}>
-                        <View style={{ width: 26, height: 52, borderRadius: 6, backgroundColor: '#C9A96E', opacity: 0.25 }} />
-                        <View style={{ width: 26, height: 52, borderRadius: 6, backgroundColor: '#C9A96E', opacity: 0.25 }} />
-                      </View>
-                    </View>
-                  </LinearGradient>
+                  {(() => {
+                    const silhouetteProps = {
+                      ectomorph:  { shoulder: 64, torso: 44, hip: 56 },
+                      mesomorph:  { shoulder: 80, torso: 56, hip: 72 },
+                      endomorph:  { shoulder: 88, torso: 70, hip: 90 },
+                    }[detectedBodyType];
+                    return (
+                      <LinearGradient
+                        colors={['#1E1E1E', '#2A2A2A']}
+                        style={{
+                          width: 140,
+                          height: 220,
+                          borderRadius: 70,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderWidth: 1,
+                          borderColor: '#C9A96E',
+                        }}
+                      >
+                        <View style={{ alignItems: 'center' }}>
+                          {/* Head */}
+                          <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#C9A96E', opacity: 0.6, marginBottom: 6 }} />
+                          {/* Shoulders */}
+                          <View style={{ width: silhouetteProps.shoulder, height: 16, borderRadius: 8, backgroundColor: '#C9A96E', opacity: 0.4, marginBottom: 4 }} />
+                          {/* Torso */}
+                          <View style={{ width: silhouetteProps.torso, height: 50, borderRadius: 6, backgroundColor: '#C9A96E', opacity: 0.3, marginBottom: 4 }} />
+                          {/* Hips */}
+                          <View style={{ width: silhouetteProps.hip, height: 20, borderRadius: 8, backgroundColor: '#C9A96E', opacity: 0.35, marginBottom: 4 }} />
+                          {/* Legs */}
+                          <View style={{ flexDirection: 'row', gap: 6 }}>
+                            <View style={{ width: 26, height: 52, borderRadius: 6, backgroundColor: '#C9A96E', opacity: 0.25 }} />
+                            <View style={{ width: 26, height: 52, borderRadius: 6, backgroundColor: '#C9A96E', opacity: 0.25 }} />
+                          </View>
+                        </View>
+                      </LinearGradient>
+                    );
+                  })()}
                 </View>
 
                 {/* Body type card */}

@@ -72,7 +72,9 @@ export default function TryOnScreen() {
   const removeImportedPhoto = useTailoredStore((s) => s.removeImportedPhoto);
   const router = useRouter();
 
-  const activeItem: ClothingItem | null = savedItems[0] ?? null;
+  const [selectedItemId, setSelectedItemId] = useState<string>(savedItems[0]?.id ?? '');
+
+  const activeItem: ClothingItem | null = savedItems.find((s) => s.id === selectedItemId) ?? savedItems[0] ?? null;
 
   const handlePickPhoto = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -532,126 +534,145 @@ export default function TryOnScreen() {
 
         {activeTab === 'virtual' && (
           <Animated.View entering={nativeEntering(FadeInDown.duration(400))} style={{ flex: 1 }}>
-            {/* Scan Body button */}
-            <View style={{ paddingHorizontal: 24, marginBottom: 12 }}>
-              <Pressable
-                onPress={() => { router.push('/body-scan'); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
-                testID="scan-body-button"
-                style={({ pressed }) => ({
-                  opacity: pressed ? 0.75 : 1,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  paddingVertical: 12,
-                  paddingHorizontal: 20,
-                  borderRadius: 24,
-                  borderWidth: 1,
-                  borderColor: 'rgba(201,169,110,0.5)',
-                  backgroundColor: 'rgba(201,169,110,0.07)',
-                  alignSelf: 'flex-start',
-                })}
-              >
-                <Camera size={16} color="#C9A96E" strokeWidth={1.5} />
-                <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: '#C9A96E' }}>
-                  Scan Body
+            {savedItems.length === 0 ? (
+              <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 }}>
+                <Text style={{ fontFamily: 'CormorantGaramond_700Bold', fontSize: 22, color: '#F5F0E8', marginBottom: 10, textAlign: 'center' }}>
+                  No wardrobe items yet
                 </Text>
-              </Pressable>
-            </View>
-
-            {/* Body silhouette area */}
-            <View style={{ flex: 1, paddingHorizontal: 24, position: 'relative' }}>
-              <LinearGradient
-                colors={['#161616', '#1E1E1E', '#161616']}
-                style={{ flex: 1, borderRadius: 24, alignItems: 'center', justifyContent: 'center' }}
-              >
-                {/* Body silhouette */}
-                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                  <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(201,169,110,0.15)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.3)', marginBottom: 8 }} />
-                  <View style={{ width: 20, height: 16, backgroundColor: 'rgba(201,169,110,0.1)' }} />
-                  <View style={{ width: 140, height: 24, borderRadius: 12, backgroundColor: 'rgba(201,169,110,0.12)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.2)', marginBottom: 2 }} />
-                  <View style={{ width: 100, height: 90, borderRadius: 8, backgroundColor: 'rgba(201,169,110,0.08)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.15)', marginBottom: 2 }} />
-                  <View style={{ width: 120, height: 30, borderRadius: 10, backgroundColor: 'rgba(201,169,110,0.1)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.2)', marginBottom: 2 }} />
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <View style={{ width: 50, height: 110, borderRadius: 10, backgroundColor: 'rgba(201,169,110,0.07)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.15)' }} />
-                    <View style={{ width: 50, height: 110, borderRadius: 10, backgroundColor: 'rgba(201,169,110,0.07)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.15)' }} />
-                  </View>
-                </View>
-
-                {/* Tension point indicators - using absolute within the gradient container */}
-                <View style={{ position: 'absolute', top: '28%', left: '30%', width: 10, height: 10, borderRadius: 5, backgroundColor: '#FF9800', opacity: 0.85 }} />
-                <View style={{ position: 'absolute', top: '42%', left: '25%', width: 10, height: 10, borderRadius: 5, backgroundColor: '#4CAF50', opacity: 0.85 }} />
-                <View style={{ position: 'absolute', top: '56%', left: '50%', width: 10, height: 10, borderRadius: 5, backgroundColor: '#F44336', opacity: 0.85 }} />
-                <View style={{ position: 'absolute', top: '70%', left: '38%', width: 10, height: 10, borderRadius: 5, backgroundColor: '#4CAF50', opacity: 0.85 }} />
-
-                {/* Fit score badge */}
-                <View style={{
-                  position: 'absolute',
-                  top: 16,
-                  right: 16,
-                  backgroundColor: 'rgba(0,0,0,0.7)',
-                  borderRadius: 20,
-                  paddingHorizontal: 12,
-                  paddingVertical: 6,
-                  borderWidth: 1,
-                  borderColor: 'rgba(201,169,110,0.4)',
-                }}>
-                  <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#C9A96E' }}>
-                    {activeItem ? `${activeItem.fitScore}%` : '—'}
-                  </Text>
-                  <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 9, color: '#A89880', textAlign: 'center' }}>
-                    FIT
-                  </Text>
-                </View>
-              </LinearGradient>
-            </View>
-
-            {/* Outfit selector */}
-            <View style={{ paddingTop: 16, paddingBottom: 8 }}>
-              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, paddingHorizontal: 24, marginBottom: 12 }}>
-                YOUR WARDROBE
-              </Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingLeft: 24, paddingRight: 12 }}
-                style={{ flexGrow: 0 }}
-              >
-                {savedItems.map((item, index) => (
+                <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 14, color: '#A89880', textAlign: 'center', lineHeight: 22 }}>
+                  Import clothing from the Import Clothing tab first
+                </Text>
+              </View>
+            ) : (
+              <>
+                {/* Scan Body button */}
+                <View style={{ paddingHorizontal: 24, marginBottom: 12 }}>
                   <Pressable
-                    key={item.id}
-                    testID={`wardrobe-item-${item.id}`}
-                    onPress={() => Haptics.selectionAsync()}
-                    style={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: 14,
-                      marginRight: 10,
-                      borderWidth: 2,
-                      borderColor: index === 0 ? '#C9A96E' : '#2A2A2A',
-                      overflow: 'hidden',
-                    }}
+                    onPress={() => { router.push('/body-scan'); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+                    testID="scan-body-button"
+                    style={({ pressed }) => ({
+                      opacity: pressed ? 0.75 : 1,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                      paddingVertical: 12,
+                      paddingHorizontal: 20,
+                      borderRadius: 24,
+                      borderWidth: 1,
+                      borderColor: 'rgba(201,169,110,0.5)',
+                      backgroundColor: 'rgba(201,169,110,0.07)',
+                      alignSelf: 'flex-start',
+                    })}
                   >
-                    <LinearGradient
-                      colors={['#2A2A2A', '#1E1E1E']}
-                      style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
-                    >
-                      <Text style={{ fontSize: 24 }}>{emojiMap[item.category] ?? '👕'}</Text>
-                    </LinearGradient>
+                    <Camera size={16} color="#C9A96E" strokeWidth={1.5} />
+                    <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: '#C9A96E' }}>
+                      Scan Body
+                    </Text>
                   </Pressable>
-                ))}
-              </ScrollView>
-            </View>
+                </View>
 
-            {/* Bottom analysis panel */}
-            <View style={{ marginHorizontal: 24, marginBottom: 16, backgroundColor: '#161616', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2A2A2A' }}>
-              <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: '#F5F0E8', marginBottom: 6 }}>
-                {activeItem?.name ?? 'Select a garment'}
-              </Text>
-              <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: '#A89880', lineHeight: 18 }}>
-                Slight tension across shoulders. Waist sits well. Consider sizing up for more ease.
-              </Text>
-            </View>
+                {/* Body silhouette area */}
+                <View style={{ flex: 1, paddingHorizontal: 24, position: 'relative' }}>
+                  <LinearGradient
+                    colors={['#161616', '#1E1E1E', '#161616']}
+                    style={{ flex: 1, borderRadius: 24, alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    {/* Body silhouette */}
+                    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(201,169,110,0.15)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.3)', marginBottom: 8 }} />
+                      <View style={{ width: 20, height: 16, backgroundColor: 'rgba(201,169,110,0.1)' }} />
+                      <View style={{ width: 140, height: 24, borderRadius: 12, backgroundColor: 'rgba(201,169,110,0.12)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.2)', marginBottom: 2 }} />
+                      <View style={{ width: 100, height: 90, borderRadius: 8, backgroundColor: 'rgba(201,169,110,0.08)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.15)', marginBottom: 2 }} />
+                      <View style={{ width: 120, height: 30, borderRadius: 10, backgroundColor: 'rgba(201,169,110,0.1)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.2)', marginBottom: 2 }} />
+                      <View style={{ flexDirection: 'row', gap: 8 }}>
+                        <View style={{ width: 50, height: 110, borderRadius: 10, backgroundColor: 'rgba(201,169,110,0.07)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.15)' }} />
+                        <View style={{ width: 50, height: 110, borderRadius: 10, backgroundColor: 'rgba(201,169,110,0.07)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.15)' }} />
+                      </View>
+                    </View>
+
+                    {/* Tension point indicators */}
+                    <View style={{ position: 'absolute', top: '28%', left: '30%', width: 10, height: 10, borderRadius: 5, backgroundColor: '#FF9800', opacity: 0.85 }} />
+                    <View style={{ position: 'absolute', top: '42%', left: '25%', width: 10, height: 10, borderRadius: 5, backgroundColor: '#4CAF50', opacity: 0.85 }} />
+                    <View style={{ position: 'absolute', top: '56%', left: '50%', width: 10, height: 10, borderRadius: 5, backgroundColor: '#F44336', opacity: 0.85 }} />
+                    <View style={{ position: 'absolute', top: '70%', left: '38%', width: 10, height: 10, borderRadius: 5, backgroundColor: '#4CAF50', opacity: 0.85 }} />
+
+                    {/* Fit score badge */}
+                    <View style={{
+                      position: 'absolute',
+                      top: 16,
+                      right: 16,
+                      backgroundColor: 'rgba(0,0,0,0.7)',
+                      borderRadius: 20,
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      borderWidth: 1,
+                      borderColor: 'rgba(201,169,110,0.4)',
+                    }}>
+                      <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#C9A96E' }}>
+                        {activeItem ? `${activeItem.fitScore}%` : '—'}
+                      </Text>
+                      <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 9, color: '#A89880', textAlign: 'center' }}>
+                        FIT
+                      </Text>
+                    </View>
+                  </LinearGradient>
+                </View>
+
+                {/* Outfit selector */}
+                <View style={{ paddingTop: 16, paddingBottom: 8 }}>
+                  <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, paddingHorizontal: 24, marginBottom: 12 }}>
+                    YOUR WARDROBE
+                  </Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingLeft: 24, paddingRight: 12 }}
+                    style={{ flexGrow: 0 }}
+                  >
+                    {savedItems.map((item) => (
+                      <Pressable
+                        key={item.id}
+                        testID={`wardrobe-item-${item.id}`}
+                        onPress={() => { setSelectedItemId(item.id); Haptics.selectionAsync(); }}
+                        style={{
+                          width: 64,
+                          height: 64,
+                          borderRadius: 14,
+                          marginRight: 10,
+                          borderWidth: 2,
+                          borderColor: item.id === selectedItemId ? '#C9A96E' : '#2A2A2A',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <LinearGradient
+                          colors={['#2A2A2A', '#1E1E1E']}
+                          style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          <Text style={{ fontSize: 24 }}>{emojiMap[item.category] ?? '👕'}</Text>
+                        </LinearGradient>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                </View>
+
+                {/* Bottom analysis panel */}
+                <View style={{ marginHorizontal: 24, marginBottom: 16, backgroundColor: '#161616', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2A2A2A' }}>
+                  <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: '#F5F0E8', marginBottom: 6 }}>
+                    {activeItem?.name ?? 'Select a garment'}
+                  </Text>
+                  <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: '#A89880', lineHeight: 18 }}>
+                    {activeItem == null
+                      ? 'Select a garment above to see fit analysis.'
+                      : activeItem.fitScore >= 80
+                      ? 'Excellent fit across all zones. The proportions complement your body type perfectly.'
+                      : activeItem.fitScore >= 60
+                      ? 'Good overall fit. Minor tension noted at the shoulders — consider sizing up for more comfort.'
+                      : "This garment's proportions don't align well with your measurements. We recommend exploring alternatives."}
+                  </Text>
+                </View>
+              </>
+            )}
           </Animated.View>
         )}
       </SafeAreaView>

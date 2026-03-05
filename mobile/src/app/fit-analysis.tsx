@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -95,8 +95,42 @@ export default function FitAnalysisScreen() {
   const router = useRouter();
   const { itemId } = useLocalSearchParams<{ itemId: string }>();
   const savedItems = useTailoredStore((s) => s.savedItems);
+  const [addedToWardrobe, setAddedToWardrobe] = useState<boolean>(false);
 
   const item = savedItems.find((i) => i.id === itemId) ?? savedItems[0];
+
+  // Guard: item not found
+  if (!item) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#0A0A0A' }} testID="fit-analysis-not-found">
+        <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
+          <Text style={{ fontFamily: 'CormorantGaramond_700Bold', fontSize: 24, color: '#F5F0E8', marginBottom: 12, textAlign: 'center' }}>
+            Item not found
+          </Text>
+          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 14, color: '#A89880', textAlign: 'center', marginBottom: 28 }}>
+            This item could not be loaded.
+          </Text>
+          <Pressable
+            testID="not-found-back-button"
+            onPress={() => router.back()}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.8 : 1,
+              paddingHorizontal: 28,
+              paddingVertical: 14,
+              borderRadius: 27,
+              borderWidth: 1,
+              borderColor: '#2A2A2A',
+              backgroundColor: '#161616',
+            })}
+          >
+            <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 14, color: '#F5F0E8' }}>
+              Go Back
+            </Text>
+          </Pressable>
+        </SafeAreaView>
+      </View>
+    );
+  }
 
   const emojiMap: Record<string, string> = {
     shirt: '👔',
@@ -236,7 +270,11 @@ export default function FitAnalysisScreen() {
           <Animated.View entering={nativeEntering(FadeInDown.delay(300).duration(500))} style={{ paddingHorizontal: 24, gap: 12 }}>
             <Pressable
               testID="find-alternatives-button"
-              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.back();
+                router.push('/(tabs)/tryon');
+              }}
               style={({ pressed }) => ({
                 opacity: pressed ? 0.8 : 1,
                 height: 54,
@@ -255,21 +293,38 @@ export default function FitAnalysisScreen() {
 
             <Pressable
               testID="add-to-wardrobe-button"
-              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
-              style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
+              disabled={addedToWardrobe}
+              onPress={() => {
+                if (!addedToWardrobe) {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  setAddedToWardrobe(true);
+                }
+              }}
+              style={({ pressed }) => ({ opacity: pressed && !addedToWardrobe ? 0.85 : 1 })}
             >
               <LinearGradient
-                colors={['#C9A96E', '#A07840']}
+                colors={addedToWardrobe ? ['#2A2A2A', '#1E1E1E'] : ['#C9A96E', '#A07840']}
                 style={{
                   height: 54,
                   borderRadius: 27,
                   alignItems: 'center',
                   justifyContent: 'center',
+                  flexDirection: 'row',
+                  gap: 8,
                 }}
               >
-                <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#0A0A0A', letterSpacing: 1 }}>
-                  ADD TO WARDROBE
-                </Text>
+                {addedToWardrobe ? (
+                  <>
+                    <Check size={16} color="#4CAF50" strokeWidth={2.5} />
+                    <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#4CAF50', letterSpacing: 1 }}>
+                      IN YOUR WARDROBE
+                    </Text>
+                  </>
+                ) : (
+                  <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#0A0A0A', letterSpacing: 1 }}>
+                    ADD TO WARDROBE
+                  </Text>
+                )}
               </LinearGradient>
             </Pressable>
           </Animated.View>

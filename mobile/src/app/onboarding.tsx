@@ -70,10 +70,12 @@ export default function OnboardingScreen() {
     router.replace('/profile-setup');
   };
 
+  const hasCompletedProfile = useTailoredStore((s) => s.hasCompletedProfile);
+
   const handleSkip = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setProfile({ hasCompletedOnboarding: true });
-    router.replace('/profile-setup');
+    router.replace(hasCompletedProfile ? '/(tabs)' : '/profile-setup');
   };
 
   return (
