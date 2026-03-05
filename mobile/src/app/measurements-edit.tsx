@@ -160,10 +160,11 @@ export default function MeasurementsEditScreen() {
 
   const [unit, setUnit] = useState<Unit>('cm');
 
-  const cmToDisplay = (cm: number): string => {
-    if (cm === 0) return '';
-    if (unit === 'in') return (cm / 2.54).toFixed(1);
-    return cm.toString();
+  const cmToDisplay = (cm: number | undefined): string => {
+    const val = cm ?? 0;
+    if (val === 0) return '';
+    if (unit === 'in') return (val / 2.54).toFixed(1);
+    return val.toString();
   };
 
   const [chest, setChest] = useState<string>(cmToDisplay(measurements.chest));

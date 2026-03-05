@@ -68,6 +68,23 @@ const useTailoredStore = create<TailoredStore>()(
     {
       name: "tailored-storage",
       storage: createJSONStorage(() => AsyncStorage),
+      // Merge persisted state with defaults so new fields (shoulder, inseam)
+      // are always present even when loading old stored data that lacks them.
+      merge: (persisted, current) => {
+        const p = persisted as Partial<TailoredStore>;
+        return {
+          ...current,
+          ...p,
+          measurements: {
+            chest: 0,
+            waist: 0,
+            hips: 0,
+            shoulder: 0,
+            inseam: 0,
+            ...(p.measurements ?? {}),
+          },
+        };
+      },
     }
   )
 );
