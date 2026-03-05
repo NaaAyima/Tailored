@@ -3,7 +3,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { KeyboardProvider } from 'react-native-keyboard-controller';
 import {
   useFonts,
   CormorantGaramond_400Regular,
@@ -80,9 +79,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <KeyboardProvider>
-          <RootLayoutNav />
-        </KeyboardProvider>
+        <RootLayoutNav />
       </GestureHandlerRootView>
     </QueryClientProvider>
   );
