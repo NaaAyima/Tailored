@@ -193,7 +193,7 @@ export default function FitAnalysisScreen() {
           {/* Item name */}
           <Animated.View entering={nativeEntering(FadeInDown.delay(100).duration(500))} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
             <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: '#A89880', marginBottom: 4, letterSpacing: 0.5 }}>
-              {item.brand.toUpperCase()} · {item.price}
+              {item.brand.toUpperCase()}
             </Text>
             <Text style={{ fontFamily: 'CormorantGaramond_700Bold', fontSize: 28, color: '#F5F0E8', lineHeight: 32 }}>
               {item.name}
