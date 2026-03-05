@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
 import { Link2, Camera, ChevronRight } from 'lucide-react-native';
 import { ClothingItem } from '@/lib/state/tailored-store';
@@ -97,7 +98,7 @@ export default function TryOnScreen() {
 
         {activeTab === 'import' && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }}>
-            <Animated.View entering={FadeInDown.duration(400)}>
+            <Animated.View entering={nativeEntering(FadeInDown.duration(400))}>
               {/* URL Input */}
               <View style={{
                 backgroundColor: '#161616',
@@ -215,7 +216,7 @@ export default function TryOnScreen() {
         )}
 
         {activeTab === 'virtual' && (
-          <Animated.View entering={FadeInDown.duration(400)} style={{ flex: 1 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.duration(400))} style={{ flex: 1 }}>
             {/* Body silhouette area */}
             <View style={{ flex: 1, paddingHorizontal: 24, position: 'relative' }}>
               <LinearGradient

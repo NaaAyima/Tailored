@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
 import { ChevronRight, Bell, Shield, Ruler, Info, LogOut } from 'lucide-react-native';
 
@@ -47,7 +48,7 @@ export default function ProfileScreen() {
           </View>
 
           {/* Avatar + Name */}
-          <Animated.View entering={FadeInDown.delay(50).duration(500)} style={{ alignItems: 'center', paddingBottom: 32 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(50).duration(500))} style={{ alignItems: 'center', paddingBottom: 32 }}>
             <LinearGradient
               colors={['#C9A96E', '#A07840']}
               style={{ width: 88, height: 88, borderRadius: 44, alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}
@@ -79,7 +80,7 @@ export default function ProfileScreen() {
           </Animated.View>
 
           {/* Body Stats Card */}
-          <Animated.View entering={FadeInDown.delay(100).duration(500)} style={{ paddingHorizontal: 24, marginBottom: 16 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(100).duration(500))} style={{ paddingHorizontal: 24, marginBottom: 16 }}>
             <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, marginBottom: 12 }}>
               BODY STATS
             </Text>
@@ -113,7 +114,7 @@ export default function ProfileScreen() {
           </Animated.View>
 
           {/* Measurements Card */}
-          <Animated.View entering={FadeInDown.delay(150).duration(500)} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(150).duration(500))} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
             <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, marginBottom: 12 }}>
               MEASUREMENTS
             </Text>
@@ -147,7 +148,7 @@ export default function ProfileScreen() {
           </Animated.View>
 
           {/* Style Preferences */}
-          <Animated.View entering={FadeInDown.delay(200).duration(500)} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(200).duration(500))} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
             <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, marginBottom: 14 }}>
               STYLE PREFERENCES
             </Text>
@@ -183,7 +184,7 @@ export default function ProfileScreen() {
           </Animated.View>
 
           {/* Settings */}
-          <Animated.View entering={FadeInDown.delay(250).duration(500)} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(250).duration(500))} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
             <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, marginBottom: 12 }}>
               SETTINGS
             </Text>
@@ -217,7 +218,7 @@ export default function ProfileScreen() {
           </Animated.View>
 
           {/* Sign Out */}
-          <Animated.View entering={FadeInDown.delay(300).duration(500)} style={{ paddingHorizontal: 24 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(300).duration(500))} style={{ paddingHorizontal: 24 }}>
             <Pressable
               testID="sign-out-button"
               onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}

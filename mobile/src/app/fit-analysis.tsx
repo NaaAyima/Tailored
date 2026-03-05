@@ -11,6 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
 import { X, Check, AlertCircle, Minus } from 'lucide-react-native';
 
@@ -144,7 +145,7 @@ export default function FitAnalysisScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
           {/* Item visual */}
-          <Animated.View entering={FadeInDown.delay(50).duration(500)}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(50).duration(500))}>
             <LinearGradient
               colors={['#1E1E1E', '#161616']}
               style={{ marginHorizontal: 24, borderRadius: 20, height: 220, alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}
@@ -156,7 +157,7 @@ export default function FitAnalysisScreen() {
           </Animated.View>
 
           {/* Item name */}
-          <Animated.View entering={FadeInDown.delay(100).duration(500)} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(100).duration(500))} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
             <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: '#A89880', marginBottom: 4, letterSpacing: 0.5 }}>
               {item.brand.toUpperCase()} · {item.price}
             </Text>
@@ -166,12 +167,12 @@ export default function FitAnalysisScreen() {
           </Animated.View>
 
           {/* Score circle */}
-          <Animated.View entering={FadeInDown.delay(150).duration(500)} style={{ alignItems: 'center', marginBottom: 32 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(150).duration(500))} style={{ alignItems: 'center', marginBottom: 32 }}>
             <AnimatedScoreCircle score={item.fitScore} />
           </Animated.View>
 
           {/* Analysis cards */}
-          <Animated.View entering={FadeInDown.delay(200).duration(500)} style={{ paddingHorizontal: 24, marginBottom: 24 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(200).duration(500))} style={{ paddingHorizontal: 24, marginBottom: 24 }}>
             <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, marginBottom: 14 }}>
               FIT BREAKDOWN
             </Text>
@@ -212,7 +213,7 @@ export default function FitAnalysisScreen() {
           </Animated.View>
 
           {/* AI Recommendation */}
-          <Animated.View entering={FadeInDown.delay(250).duration(500)} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(250).duration(500))} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
             <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, marginBottom: 14 }}>
               AI RECOMMENDATION
             </Text>
@@ -232,7 +233,7 @@ export default function FitAnalysisScreen() {
           </Animated.View>
 
           {/* CTAs */}
-          <Animated.View entering={FadeInDown.delay(300).duration(500)} style={{ paddingHorizontal: 24, gap: 12 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(300).duration(500))} style={{ paddingHorizontal: 24, gap: 12 }}>
             <Pressable
               testID="find-alternatives-button"
               onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}

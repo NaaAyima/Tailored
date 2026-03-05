@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInRight, FadeInDown } from 'react-native-reanimated';
+import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
 import { Check } from 'lucide-react-native';
 
@@ -108,7 +109,7 @@ export default function ProfileSetupScreen() {
   if (done) {
     return (
       <View style={{ flex: 1, backgroundColor: '#0A0A0A', alignItems: 'center', justifyContent: 'center' }}>
-        <Animated.View entering={FadeInDown.duration(600)} style={{ alignItems: 'center' }}>
+        <Animated.View entering={nativeEntering(FadeInDown.duration(600))} style={{ alignItems: 'center' }}>
           <LinearGradient
             colors={['#C9A96E', '#A07840']}
             style={{ width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}
@@ -172,7 +173,7 @@ export default function ProfileSetupScreen() {
             keyboardShouldPersistTaps="handled"
           >
             {step === 0 && (
-              <Animated.View entering={FadeInRight.duration(400)}>
+              <Animated.View entering={nativeEntering(FadeInRight.duration(400))}>
                 <Text style={{ fontFamily: 'CormorantGaramond_700Bold_Italic', fontSize: 38, color: '#F5F0E8', marginBottom: 8 }}>
                   Your Stats
                 </Text>
@@ -270,7 +271,7 @@ export default function ProfileSetupScreen() {
             )}
 
             {step === 1 && (
-              <Animated.View entering={FadeInRight.duration(400)}>
+              <Animated.View entering={nativeEntering(FadeInRight.duration(400))}>
                 <Text style={{ fontFamily: 'CormorantGaramond_700Bold_Italic', fontSize: 38, color: '#F5F0E8', marginBottom: 8 }}>
                   Measurements
                 </Text>
@@ -335,7 +336,7 @@ export default function ProfileSetupScreen() {
             )}
 
             {step === 2 && (
-              <Animated.View entering={FadeInRight.duration(400)}>
+              <Animated.View entering={nativeEntering(FadeInRight.duration(400))}>
                 <Text style={{ fontFamily: 'CormorantGaramond_700Bold_Italic', fontSize: 38, color: '#F5F0E8', marginBottom: 8 }}>
                   Your Body Type
                 </Text>

@@ -17,6 +17,7 @@ import Animated, {
   FadeInDown,
   FadeInUp,
 } from 'react-native-reanimated';
+import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -139,7 +140,7 @@ export default function OnboardingScreen() {
 
                 {/* Text content */}
                 <Animated.View
-                  entering={FadeInDown.delay(200).duration(700)}
+                  entering={nativeEntering(FadeInDown.delay(200).duration(700))}
                   style={{ paddingHorizontal: 36, paddingBottom: 80, width: '100%' }}
                 >
                   <Text
@@ -190,7 +191,7 @@ export default function OnboardingScreen() {
 
           {/* CTA */}
           {activeIndex === slides.length - 1 ? (
-            <Animated.View entering={FadeIn.duration(400)}>
+            <Animated.View entering={nativeEntering(FadeIn.duration(400))}>
               <Pressable
                 onPress={handleGetStarted}
                 testID="get-started-button"

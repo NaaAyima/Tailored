@@ -10,6 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
 import { Bell } from 'lucide-react-native';
 import { ClothingItem } from '@/lib/state/tailored-store';
@@ -176,7 +177,7 @@ export default function DiscoverScreen() {
           </View>
 
           {/* Fit Score Card */}
-          <Animated.View entering={FadeInDown.delay(100).duration(600)} style={{ paddingHorizontal: 24, marginBottom: 32 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(100).duration(600))} style={{ paddingHorizontal: 24, marginBottom: 32 }}>
             <LinearGradient
               colors={['#1a1208', '#1E1A10', '#161616']}
               style={{ borderRadius: 20, padding: 24, borderWidth: 1, borderColor: 'rgba(201,169,110,0.2)' }}
@@ -203,7 +204,7 @@ export default function DiscoverScreen() {
           </Animated.View>
 
           {/* Recent Tries */}
-          <Animated.View entering={FadeInDown.delay(200).duration(600)} style={{ marginBottom: 32 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(200).duration(600))} style={{ marginBottom: 32 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, marginBottom: 16 }}>
               <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 18, color: '#F5F0E8' }}>
                 Recent Tries
@@ -227,7 +228,7 @@ export default function DiscoverScreen() {
           </Animated.View>
 
           {/* Recommended For You */}
-          <Animated.View entering={FadeInDown.delay(300).duration(600)} style={{ paddingHorizontal: 24 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(300).duration(600))} style={{ paddingHorizontal: 24 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 18, color: '#F5F0E8' }}>
                 Recommended
