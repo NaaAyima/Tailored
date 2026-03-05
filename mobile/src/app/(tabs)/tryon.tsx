@@ -70,6 +70,7 @@ export default function TryOnScreen() {
   const recentImports = useTailoredStore((s) => s.recentImports);
   const addImportedPhoto = useTailoredStore((s) => s.addImportedPhoto);
   const removeImportedPhoto = useTailoredStore((s) => s.removeImportedPhoto);
+  const removeItem = useTailoredStore((s) => s.removeItem);
   const garmentPreferences = useTailoredStore((s) => s.garmentPreferences);
   const router = useRouter();
 
@@ -633,27 +634,55 @@ export default function TryOnScreen() {
                     style={{ flexGrow: 0 }}
                   >
                     {savedItems.map((item) => (
-                      <Pressable
-                        key={item.id}
-                        testID={`wardrobe-item-${item.id}`}
-                        onPress={() => { setSelectedItemId(item.id); Haptics.selectionAsync(); }}
-                        style={{
-                          width: 64,
-                          height: 64,
-                          borderRadius: 14,
-                          marginRight: 10,
-                          borderWidth: 2,
-                          borderColor: item.id === selectedItemId ? '#C9A96E' : '#2A2A2A',
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <LinearGradient
-                          colors={['#2A2A2A', '#1E1E1E']}
-                          style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
+                      <View key={item.id} style={{ marginRight: 10, alignItems: 'center' }}>
+                        <Pressable
+                          testID={`wardrobe-item-${item.id}`}
+                          onPress={() => { setSelectedItemId(item.id); Haptics.selectionAsync(); }}
+                          style={{
+                            width: 64,
+                            height: 64,
+                            borderRadius: 14,
+                            borderWidth: 2,
+                            borderColor: item.id === selectedItemId ? '#C9A96E' : '#2A2A2A',
+                            overflow: 'hidden',
+                          }}
                         >
-                          <Text style={{ fontSize: 24 }}>{emojiMap[item.category] ?? '👕'}</Text>
-                        </LinearGradient>
-                      </Pressable>
+                          <LinearGradient
+                            colors={['#2A2A2A', '#1E1E1E']}
+                            style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
+                          >
+                            <Text style={{ fontSize: 24 }}>{emojiMap[item.category] ?? '👕'}</Text>
+                          </LinearGradient>
+                        </Pressable>
+                        {/* Remove button */}
+                        <Pressable
+                          testID={`remove-wardrobe-item-${item.id}`}
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                            Alert.alert(
+                              'Remove from Wardrobe',
+                              `Remove "${item.name}" from your wardrobe?`,
+                              [
+                                { text: 'Cancel', style: 'cancel' },
+                                {
+                                  text: 'Remove',
+                                  style: 'destructive',
+                                  onPress: () => {
+                                    removeItem(item.id);
+                                    if (selectedItemId === item.id) {
+                                      setSelectedItemId(savedItems.find(s => s.id !== item.id)?.id ?? '');
+                                    }
+                                  },
+                                },
+                              ]
+                            );
+                          }}
+                          style={{ marginTop: 5, width: 20, height: 20, borderRadius: 10, backgroundColor: 'rgba(244,67,54,0.15)', borderWidth: 1, borderColor: 'rgba(244,67,54,0.3)', alignItems: 'center', justifyContent: 'center' }}
+                          hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                        >
+                          <X size={10} color="#F44336" strokeWidth={2.5} />
+                        </Pressable>
+                      </View>
                     ))}
                   </ScrollView>
                 </View>

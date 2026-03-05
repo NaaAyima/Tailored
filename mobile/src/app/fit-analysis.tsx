@@ -95,9 +95,11 @@ export default function FitAnalysisScreen() {
   const router = useRouter();
   const { itemId } = useLocalSearchParams<{ itemId: string }>();
   const savedItems = useTailoredStore((s) => s.savedItems);
-  const [addedToWardrobe, setAddedToWardrobe] = useState<boolean>(false);
+  const addItem = useTailoredStore((s) => s.addItem);
+  const removeItem = useTailoredStore((s) => s.removeItem);
 
   const item = savedItems.find((i) => i.id === itemId) ?? savedItems[0];
+  const isInWardrobe = !!savedItems.find((i) => i.id === item?.id);
 
   // Guard: item not found
   if (!item) {
@@ -293,17 +295,19 @@ export default function FitAnalysisScreen() {
 
             <Pressable
               testID="add-to-wardrobe-button"
-              disabled={addedToWardrobe}
               onPress={() => {
-                if (!addedToWardrobe) {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  setAddedToWardrobe(true);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                if (isInWardrobe) {
+                  removeItem(item.id);
+                  router.back();
+                } else {
+                  addItem(item);
                 }
               }}
-              style={({ pressed }) => ({ opacity: pressed && !addedToWardrobe ? 0.85 : 1 })}
+              style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
             >
               <LinearGradient
-                colors={addedToWardrobe ? ['#2A2A2A', '#1E1E1E'] : ['#C9A96E', '#A07840']}
+                colors={isInWardrobe ? ['#2A2A2A', '#1E1E1E'] : ['#C9A96E', '#A07840']}
                 style={{
                   height: 54,
                   borderRadius: 27,
@@ -313,11 +317,11 @@ export default function FitAnalysisScreen() {
                   gap: 8,
                 }}
               >
-                {addedToWardrobe ? (
+                {isInWardrobe ? (
                   <>
-                    <Check size={16} color="#4CAF50" strokeWidth={2.5} />
-                    <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#4CAF50', letterSpacing: 1 }}>
-                      IN YOUR WARDROBE
+                    <X size={16} color="#F44336" strokeWidth={2.5} />
+                    <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#F44336', letterSpacing: 1 }}>
+                      REMOVE FROM WARDROBE
                     </Text>
                   </>
                 ) : (

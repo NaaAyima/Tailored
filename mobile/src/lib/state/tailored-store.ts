@@ -59,6 +59,7 @@ interface TailoredStore {
   // Clothing items
   savedItems: ClothingItem[];
   addItem: (item: ClothingItem) => void;
+  removeItem: (id: string) => void;
 
   // Recent imported photos (persisted)
   recentImports: ImportedPhoto[];
@@ -101,6 +102,7 @@ const useTailoredStore = create<TailoredStore>()(
         { id: "5", name: "Wide Leg Denim Jeans", brand: "Levi's", imageUrl: null, fitScore: 71, category: "pants", price: "$98.00" },
       ],
       addItem: (item) => set((state) => ({ savedItems: [...state.savedItems, item] })),
+      removeItem: (id) => set((state) => ({ savedItems: state.savedItems.filter((i) => i.id !== id) })),
 
       // Recent imported photos
       recentImports: [],
