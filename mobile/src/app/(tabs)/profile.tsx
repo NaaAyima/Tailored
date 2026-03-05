@@ -226,9 +226,11 @@ export default function ProfileScreen() {
 
           {/* Style Preferences */}
           <Animated.View entering={nativeEntering(FadeInDown.delay(200).duration(500))} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
-            <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, marginBottom: 14 }}>
-              STYLE PREFERENCES
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2 }}>
+                STYLE PREFERENCES
+              </Text>
+            </View>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
               {STYLE_PREFS.map((pref) => {
                 const isActive = stylePreferences.includes(pref);
@@ -258,6 +260,36 @@ export default function ProfileScreen() {
                 );
               })}
             </View>
+          </Animated.View>
+
+          {/* Garment Preferences */}
+          <Animated.View entering={nativeEntering(FadeInDown.delay(225).duration(500))} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
+            <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, marginBottom: 12 }}>
+              GARMENT PREFERENCES
+            </Text>
+            <Pressable
+              onPress={() => { Haptics.selectionAsync(); router.push('/garment-preferences'); }}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.75 : 1,
+                backgroundColor: '#161616',
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: '#2A2A2A',
+                padding: 18,
+                flexDirection: 'row',
+                alignItems: 'center',
+              })}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 14, color: '#F5F0E8', marginBottom: 3 }}>
+                  Sleeve, neck, fit & more
+                </Text>
+                <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: '#A89880' }}>
+                  Used by the AI when analysing your photos
+                </Text>
+              </View>
+              <ChevronRight size={16} color="#3A3A3A" />
+            </Pressable>
           </Animated.View>
 
           {/* Settings */}

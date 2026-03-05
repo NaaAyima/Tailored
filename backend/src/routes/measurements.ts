@@ -6,17 +6,45 @@ import { env } from "../env";
 const measurementsRouter = new Hono();
 
 const analyzeSchema = z.object({
-  imageBase64: z.string().min(1), // base64 data URL: "data:image/jpeg;base64,..."
+  imageBase64: z.string().min(1),
   heightCm: z.number().min(50).max(300),
+  garmentPreferences: z.object({
+    sleeveLength: z.string().optional(),
+    neckStyle: z.string().optional(),
+    topFit: z.string().optional(),
+    trouserFit: z.string().optional(),
+    trouserLength: z.string().optional(),
+    dressLength: z.string().optional(),
+    preferredFabric: z.string().optional(),
+    additionalNotes: z.string().optional(),
+  }).optional(),
 });
 
 measurementsRouter.post("/analyze", zValidator("json", analyzeSchema), async (c) => {
-  const { imageBase64, heightCm } = c.req.valid("json");
+  const { imageBase64, heightCm, garmentPreferences } = c.req.valid("json");
+
+  // Build a preferences context string from non-"any" values
+  const prefLines: string[] = [];
+  if (garmentPreferences) {
+    const p = garmentPreferences;
+    if (p.sleeveLength && p.sleeveLength !== 'any') prefLines.push(`- Sleeve length: ${p.sleeveLength}`);
+    if (p.neckStyle && p.neckStyle !== 'any') prefLines.push(`- Neck style: ${p.neckStyle}`);
+    if (p.topFit && p.topFit !== 'any') prefLines.push(`- Top fit: ${p.topFit}`);
+    if (p.trouserFit && p.trouserFit !== 'any') prefLines.push(`- Trouser fit: ${p.trouserFit}`);
+    if (p.trouserLength && p.trouserLength !== 'any') prefLines.push(`- Trouser length: ${p.trouserLength}`);
+    if (p.dressLength && p.dressLength !== 'any') prefLines.push(`- Dress/skirt length: ${p.dressLength}`);
+    if (p.preferredFabric) prefLines.push(`- Preferred fabrics: ${p.preferredFabric}`);
+    if (p.additionalNotes) prefLines.push(`- Additional notes: ${p.additionalNotes}`);
+  }
+
+  const prefsContext = prefLines.length > 0
+    ? `\n\nThe user has the following garment preferences — factor these into your notes and measurement recommendations:\n${prefLines.join('\n')}`
+    : '';
 
   const prompt = `You are a precise body measurement estimation system. The user is ${heightCm}cm tall.
 
 Analyze this full-body photo and estimate the following measurements in centimeters.
-Use the provided height (${heightCm}cm) as your reference scale to calculate all other measurements proportionally.
+Use the provided height (${heightCm}cm) as your reference scale to calculate all other measurements proportionally.${prefsContext}
 
 Return ONLY a valid JSON object with this exact structure, no explanation:
 {
@@ -26,7 +54,7 @@ Return ONLY a valid JSON object with this exact structure, no explanation:
   "shoulder": <number>,
   "inseam": <number>,
   "confidence": <"high"|"medium"|"low">,
-  "notes": <string, max 100 chars, brief observation about the body type or fit tips>
+  "notes": <string, max 120 chars, brief observation about fit given the user's preferences>
 }
 
 Rules:

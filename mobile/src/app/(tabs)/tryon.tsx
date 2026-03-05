@@ -70,6 +70,7 @@ export default function TryOnScreen() {
   const recentImports = useTailoredStore((s) => s.recentImports);
   const addImportedPhoto = useTailoredStore((s) => s.addImportedPhoto);
   const removeImportedPhoto = useTailoredStore((s) => s.removeImportedPhoto);
+  const garmentPreferences = useTailoredStore((s) => s.garmentPreferences);
   const router = useRouter();
 
   const [selectedItemId, setSelectedItemId] = useState<string>(savedItems[0]?.id ?? '');
@@ -128,6 +129,7 @@ export default function TryOnScreen() {
       const result = await api.post<MeasurementAnalysis>('/api/measurements/analyze', {
         imageBase64,
         heightCm: height,
+        garmentPreferences,
       });
 
       setAnalysisResult(result);

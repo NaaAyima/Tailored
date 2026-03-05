@@ -12,6 +12,32 @@ export interface ClothingItem {
   price: string;
 }
 
+export interface GarmentPreferences {
+  // Tops
+  sleeveLength: 'short' | 'long' | 'sleeveless' | 'any';
+  neckStyle: 'round' | 'v-neck' | 'collar' | 'turtleneck' | 'any';
+  topFit: 'slim' | 'regular' | 'oversized' | 'any';
+  // Bottoms
+  trouserFit: 'slim' | 'straight' | 'baggy' | 'tapered' | 'any';
+  trouserLength: 'full' | 'cropped' | 'shorts' | 'any';
+  // Dresses / skirts
+  dressLength: 'mini' | 'midi' | 'maxi' | 'any';
+  // General
+  preferredFabric: string; // free text e.g. "cotton, linen"
+  additionalNotes: string; // free text
+}
+
+const DEFAULT_GARMENT_PREFS: GarmentPreferences = {
+  sleeveLength: 'any',
+  neckStyle: 'any',
+  topFit: 'any',
+  trouserFit: 'any',
+  trouserLength: 'any',
+  dressLength: 'any',
+  preferredFabric: '',
+  additionalNotes: '',
+};
+
 export interface ImportedPhoto {
   id: string;
   uri: string;
@@ -46,6 +72,10 @@ interface TailoredStore {
   // Units
   unit: 'cm' | 'in';
   setUnit: (unit: 'cm' | 'in') => void;
+
+  // Garment preferences
+  garmentPreferences: GarmentPreferences;
+  setGarmentPreferences: (prefs: Partial<GarmentPreferences>) => void;
 }
 
 const useTailoredStore = create<TailoredStore>()(
@@ -94,6 +124,11 @@ const useTailoredStore = create<TailoredStore>()(
       // Units
       unit: 'cm',
       setUnit: (unit) => set({ unit }),
+
+      // Garment preferences
+      garmentPreferences: DEFAULT_GARMENT_PREFS,
+      setGarmentPreferences: (prefs) =>
+        set((state) => ({ garmentPreferences: { ...state.garmentPreferences, ...prefs } })),
     }),
     {
       name: "tailored-storage",
@@ -115,6 +150,7 @@ const useTailoredStore = create<TailoredStore>()(
           },
           recentImports: p.recentImports ?? [],
           unit: p.unit ?? 'cm',
+          garmentPreferences: { ...DEFAULT_GARMENT_PREFS, ...(p.garmentPreferences ?? {}) },
         };
       },
     }
