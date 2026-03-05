@@ -19,6 +19,7 @@ import {
   DMSans_300Light,
 } from '@expo-google-fonts/dm-sans';
 import { useEffect } from 'react';
+import { useSession } from '@/lib/auth/use-session';
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
@@ -29,6 +30,10 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
+  const { data: session, isLoading } = useSession();
+
+  if (isLoading) return null;
+
   return (
     <>
       <StatusBar style="light" />
@@ -39,16 +44,23 @@ function RootLayoutNav() {
           animation: 'fade',
         }}
       >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade' }} />
-        <Stack.Screen name="profile-setup" options={{ headerShown: false, animation: 'slide_from_right' }} />
-        <Stack.Screen
-          name="fit-analysis"
-          options={{ presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' }}
-        />
-        <Stack.Screen name="body-scan" options={{ headerShown: false, animation: 'slide_from_bottom' }} />
-        <Stack.Screen name="measurements-edit" options={{ presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Protected guard={!!session?.user}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="profile-setup" options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen
+            name="fit-analysis"
+            options={{ presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' }}
+          />
+          <Stack.Screen name="body-scan" options={{ headerShown: false, animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="measurements-edit" options={{ presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="profile-edit" options={{ presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' }} />
+        </Stack.Protected>
+
+        <Stack.Protected guard={!session?.user}>
+          <Stack.Screen name="sign-in" options={{ headerShown: false, animation: 'fade' }} />
+          <Stack.Screen name="verify-otp" options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade' }} />
+        </Stack.Protected>
       </Stack>
     </>
   );

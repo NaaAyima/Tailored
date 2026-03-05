@@ -13,11 +13,15 @@ import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
 import { ChevronRight, Bell, Shield, Ruler, Info, LogOut } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { authClient } from '@/lib/auth/auth-client';
+import { useSession, useInvalidateSession } from '@/lib/auth/use-session';
 
 const STYLE_PREFS = ['Minimalist', 'Streetwear', 'Formal', 'Casual', 'Athletic', 'Avant-garde'];
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const invalidateSession = useInvalidateSession();
   const userName = useTailoredStore((s) => s.userName);
   const height = useTailoredStore((s) => s.height);
   const weight = useTailoredStore((s) => s.weight);
@@ -30,6 +34,14 @@ export default function ProfileScreen() {
   const bodyTypeLabel = bodyType
     ? bodyType.charAt(0).toUpperCase() + bodyType.slice(1)
     : 'Unknown';
+
+  const displayName = session?.user?.name ?? userName;
+
+  const handleSignOut = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await authClient.signOut();
+    await invalidateSession();
+  };
 
   const settingsItems = [
     { icon: Bell, label: 'Notifications', id: 'notifications' },
@@ -50,18 +62,23 @@ export default function ProfileScreen() {
           </View>
 
           {/* Avatar + Name */}
-          <Animated.View entering={nativeEntering(FadeInDown.delay(50).duration(500))} style={{ alignItems: 'center', paddingBottom: 32 }}>
+          <Animated.View entering={nativeEntering(FadeInDown.delay(50).duration(500))} style={{ alignItems: 'center', paddingBottom: 8 }}>
             <LinearGradient
               colors={['#C9A96E', '#A07840']}
               style={{ width: 88, height: 88, borderRadius: 44, alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}
             >
               <Text style={{ fontFamily: 'CormorantGaramond_700Bold', fontSize: 36, color: '#0A0A0A' }}>
-                {userName.charAt(0)}
+                {displayName.charAt(0)}
               </Text>
             </LinearGradient>
             <Text style={{ fontFamily: 'CormorantGaramond_700Bold', fontSize: 26, color: '#F5F0E8', marginBottom: 6 }}>
-              {userName}
+              {displayName}
             </Text>
+            {session?.user?.email ? (
+              <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: '#A89880', marginBottom: 10 }}>
+                {session.user.email}
+              </Text>
+            ) : null}
             <View style={{
               paddingHorizontal: 14,
               paddingVertical: 5,
@@ -79,7 +96,28 @@ export default function ProfileScreen() {
                 {hasCompletedProfile ? 'Fit Profile: Complete' : 'Fit Profile: Incomplete'}
               </Text>
             </View>
+            <Pressable
+              testID="edit-profile-button"
+              onPress={() => { Haptics.selectionAsync(); router.push('/profile-edit'); }}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.7 : 1,
+                marginTop: 16,
+                paddingHorizontal: 20,
+                paddingVertical: 9,
+                borderRadius: 24,
+                borderWidth: 1,
+                borderColor: 'rgba(201,169,110,0.5)',
+                backgroundColor: 'rgba(201,169,110,0.08)',
+              })}
+            >
+              <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: '#C9A96E' }}>
+                Edit Profile
+              </Text>
+            </Pressable>
           </Animated.View>
+
+          {/* Spacer before body stats */}
+          <View style={{ height: 28 }} />
 
           {/* Body Stats Card */}
           <Animated.View entering={nativeEntering(FadeInDown.delay(100).duration(500))} style={{ paddingHorizontal: 24, marginBottom: 16 }}>
@@ -260,7 +298,7 @@ export default function ProfileScreen() {
           <Animated.View entering={nativeEntering(FadeInDown.delay(300).duration(500))} style={{ paddingHorizontal: 24 }}>
             <Pressable
               testID="sign-out-button"
-              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
+              onPress={handleSignOut}
               style={({ pressed }) => ({
                 opacity: pressed ? 0.7 : 1,
                 flexDirection: 'row',
