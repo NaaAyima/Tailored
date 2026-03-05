@@ -173,11 +173,14 @@ export default function DiscoverScreen() {
               >
                 <Bell size={18} color="#A89880" strokeWidth={1.5} />
               </Pressable>
-              <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: '#C9A96E', alignItems: 'center', justifyContent: 'center' }}>
+              <Pressable
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/profile'); }}
+                style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: '#C9A96E', alignItems: 'center', justifyContent: 'center' }}
+              >
                 <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 16, color: '#0A0A0A' }}>
                   {userName.charAt(0)}
                 </Text>
-              </View>
+              </Pressable>
             </View>
           </View>
 
