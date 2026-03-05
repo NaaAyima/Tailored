@@ -40,7 +40,7 @@ Rules:
 - If you cannot see the body clearly, use the height to estimate proportional averages
 - Always return valid numbers, never null`;
 
-  const response = await fetch("https://api.openai.com/v1/responses", {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -48,15 +48,16 @@ Rules:
     },
     body: JSON.stringify({
       model: "gpt-4o",
-      input: [
+      messages: [
         {
           role: "user",
           content: [
-            { type: "input_text", text: prompt },
-            { type: "input_image", image_url: { url: imageBase64 } },
+            { type: "text", text: prompt },
+            { type: "image_url", image_url: { url: imageBase64 } },
           ],
         },
       ],
+      max_tokens: 300,
     }),
   });
 
@@ -67,10 +68,10 @@ Rules:
   }
 
   const result = await response.json() as {
-    output: Array<{ content: Array<{ text: string }> }>;
+    choices: Array<{ message: { content: string } }>;
   };
 
-  const text = result.output?.[0]?.content?.[0]?.text ?? "";
+  const text = result.choices?.[0]?.message?.content ?? "";
 
   // Extract JSON from the response (may be wrapped in markdown code block)
   const jsonMatch = text.match(/\{[\s\S]*\}/);
