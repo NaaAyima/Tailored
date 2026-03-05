@@ -4,18 +4,27 @@ import {
   Text,
   ScrollView,
   Pressable,
+  Image,
+  Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import * as ImagePicker from 'expo-image-picker';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
-import { Link2, Camera, ChevronRight } from 'lucide-react-native';
+import { Link2, Camera, ChevronRight, ImageIcon, X } from 'lucide-react-native';
 import { ClothingItem } from '@/lib/state/tailored-store';
 import { TextInput } from 'react-native';
 import { DimensionValue } from 'react-native';
 import { useRouter } from 'expo-router';
+
+interface ImportedPhoto {
+  uri: string;
+  name: string;
+}
 
 function fitScoreColor(score: number): string {
   if (score >= 80) return '#4CAF50';
@@ -42,10 +51,43 @@ const tensionPoints: TensionPoint[] = [
 export default function TryOnScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('import');
   const [urlInput, setUrlInput] = useState<string>('');
+  const [importedPhotos, setImportedPhotos] = useState<ImportedPhoto[]>([]);
   const savedItems = useTailoredStore((s) => s.savedItems);
   const router = useRouter();
 
   const activeItem: ClothingItem | null = savedItems[0] ?? null;
+
+  const handlePickPhoto = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    if (Platform.OS !== 'web') {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Required',
+          'Please allow access to your photo library to import clothing images.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: 5,
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      const newPhotos: ImportedPhoto[] = result.assets.map((asset, i) => ({
+        uri: asset.uri,
+        name: asset.fileName ?? `Clothing item ${importedPhotos.length + i + 1}`,
+      }));
+      setImportedPhotos((prev) => [...newPhotos, ...prev]);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+  };
 
   const emojiMap: Record<string, string> = {
     shirt: '👔',
@@ -139,7 +181,7 @@ export default function TryOnScreen() {
               {/* Upload Photo Button */}
               <Pressable
                 testID="upload-photo-button"
-                onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+                onPress={handlePickPhoto}
                 style={({ pressed }) => ({
                   opacity: pressed ? 0.75 : 1,
                   borderRadius: 16,
@@ -150,17 +192,65 @@ export default function TryOnScreen() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundColor: '#161616',
-                  marginBottom: 36,
+                  marginBottom: importedPhotos.length > 0 ? 20 : 36,
                 })}
               >
                 <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(201,169,110,0.1)', borderWidth: 1, borderColor: 'rgba(201,169,110,0.3)', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
-                  <Camera size={22} color="#C9A96E" strokeWidth={1.5} />
+                  <ImageIcon size={22} color="#C9A96E" strokeWidth={1.5} />
                 </View>
-                <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 14, color: '#F5F0E8', marginBottom: 4 }}>Upload Photo</Text>
+                <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 14, color: '#F5F0E8', marginBottom: 4 }}>Choose from Library</Text>
                 <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: '#A89880' }}>
-                  JPG, PNG or HEIC
+                  Select up to 5 photos
                 </Text>
               </Pressable>
+
+              {/* Imported Photos Grid */}
+              {importedPhotos.length > 0 && (
+                <View style={{ marginBottom: 36 }}>
+                  <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, marginBottom: 12 }}>
+                    IMPORTED ({importedPhotos.length})
+                  </Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                    {importedPhotos.map((photo, index) => (
+                      <View key={`${photo.uri}-${index}`} style={{ width: '47%', aspectRatio: 0.75, borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: '#2A2A2A' }}>
+                        <Image
+                          source={{ uri: photo.uri }}
+                          style={{ width: '100%', height: '100%' }}
+                          resizeMode="cover"
+                        />
+                        {/* Remove button */}
+                        <Pressable
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            setImportedPhotos((prev) => prev.filter((_, i) => i !== index));
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            width: 26,
+                            height: 26,
+                            borderRadius: 13,
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderWidth: 1,
+                            borderColor: 'rgba(255,255,255,0.2)',
+                          }}
+                        >
+                          <X size={13} color="#F5F0E8" strokeWidth={2} />
+                        </Pressable>
+                        {/* Name label */}
+                        <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.6)', padding: 8 }}>
+                          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 10, color: '#F5F0E8' }} numberOfLines={1}>
+                            {photo.name}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
 
               {/* Recent imports */}
               <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 16, color: '#F5F0E8', marginBottom: 16 }}>
