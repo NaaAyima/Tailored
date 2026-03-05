@@ -15,6 +15,7 @@ import { Link2, Camera, ChevronRight } from 'lucide-react-native';
 import { ClothingItem } from '@/lib/state/tailored-store';
 import { TextInput } from 'react-native';
 import { DimensionValue } from 'react-native';
+import { useRouter } from 'expo-router';
 
 function fitScoreColor(score: number): string {
   if (score >= 80) return '#4CAF50';
@@ -42,6 +43,7 @@ export default function TryOnScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('import');
   const [urlInput, setUrlInput] = useState<string>('');
   const savedItems = useTailoredStore((s) => s.savedItems);
+  const router = useRouter();
 
   const activeItem: ClothingItem | null = savedItems[0] ?? null;
 
@@ -217,6 +219,33 @@ export default function TryOnScreen() {
 
         {activeTab === 'virtual' && (
           <Animated.View entering={nativeEntering(FadeInDown.duration(400))} style={{ flex: 1 }}>
+            {/* Scan Body button */}
+            <View style={{ paddingHorizontal: 24, marginBottom: 12 }}>
+              <Pressable
+                onPress={() => { router.push('/body-scan'); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+                testID="scan-body-button"
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.75 : 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  paddingVertical: 12,
+                  paddingHorizontal: 20,
+                  borderRadius: 24,
+                  borderWidth: 1,
+                  borderColor: 'rgba(201,169,110,0.5)',
+                  backgroundColor: 'rgba(201,169,110,0.07)',
+                  alignSelf: 'flex-start',
+                })}
+              >
+                <Camera size={16} color="#C9A96E" strokeWidth={1.5} />
+                <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: '#C9A96E' }}>
+                  Scan Body
+                </Text>
+              </Pressable>
+            </View>
+
             {/* Body silhouette area */}
             <View style={{ flex: 1, paddingHorizontal: 24, position: 'relative' }}>
               <LinearGradient

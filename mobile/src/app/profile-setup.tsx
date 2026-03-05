@@ -299,6 +299,29 @@ export default function ProfileSetupScreen() {
                   ))}
                 </View>
 
+                {/* Scan Instead */}
+                <Pressable
+                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/body-scan'); }}
+                  testID="scan-instead-button"
+                  style={({ pressed }) => ({
+                    opacity: pressed ? 0.7 : 1,
+                    marginBottom: 28,
+                    paddingVertical: 14,
+                    paddingHorizontal: 18,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: 'rgba(201,169,110,0.3)',
+                    backgroundColor: 'rgba(201,169,110,0.06)',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  })}
+                >
+                  <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: '#C9A96E', flex: 1, lineHeight: 18 }}>
+                    Or use your camera to auto-detect measurements →
+                  </Text>
+                </Pressable>
+
                 {[
                   { label: 'CHEST', value: chest, setter: setChest, id: 'chest', placeholder: unit === 'cm' ? '95' : '37' },
                   { label: 'WAIST', value: waist, setter: setWaist, id: 'waist', placeholder: unit === 'cm' ? '80' : '31' },

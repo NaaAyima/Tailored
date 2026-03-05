@@ -46,6 +46,7 @@ function RootLayoutNav() {
           name="fit-analysis"
           options={{ presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' }}
         />
+        <Stack.Screen name="body-scan" options={{ headerShown: false, animation: 'slide_from_bottom' }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </>
