@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Home, Shirt, User } from 'lucide-react-native';
+import { Home, Shirt, SlidersHorizontal, User } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -40,6 +40,15 @@ export default function TabLayout() {
           title: 'Try On',
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Shirt size={size - 2} color={color} strokeWidth={1.5} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="preferences"
+        options={{
+          title: 'Preferences',
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <SlidersHorizontal size={size - 2} color={color} strokeWidth={1.5} />
           ),
         }}
       />
