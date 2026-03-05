@@ -7,11 +7,13 @@ import {
   Image,
   Alert,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
@@ -20,10 +22,21 @@ import { ClothingItem } from '@/lib/state/tailored-store';
 import { TextInput } from 'react-native';
 import { DimensionValue } from 'react-native';
 import { useRouter } from 'expo-router';
+import { api } from '@/lib/api/api';
 
 interface ImportedPhoto {
   uri: string;
   name: string;
+}
+
+interface MeasurementAnalysis {
+  chest: number;
+  waist: number;
+  hips: number;
+  shoulder: number;
+  inseam: number;
+  confidence: 'high' | 'medium' | 'low';
+  notes: string;
 }
 
 function fitScoreColor(score: number): string {
@@ -52,7 +65,12 @@ export default function TryOnScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('import');
   const [urlInput, setUrlInput] = useState<string>('');
   const [importedPhotos, setImportedPhotos] = useState<ImportedPhoto[]>([]);
+  const [analysisResult, setAnalysisResult] = useState<MeasurementAnalysis | null>(null);
+  const [analyzingIndex, setAnalyzingIndex] = useState<number | null>(null);
+
   const savedItems = useTailoredStore((s) => s.savedItems);
+  const height = useTailoredStore((s) => s.height);
+  const setProfile = useTailoredStore((s) => s.setProfile);
   const router = useRouter();
 
   const activeItem: ClothingItem | null = savedItems[0] ?? null;
@@ -86,6 +104,35 @@ export default function TryOnScreen() {
       }));
       setImportedPhotos((prev) => [...newPhotos, ...prev]);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+  };
+
+  const analyzePhoto = async (photo: ImportedPhoto, index: number) => {
+    try {
+      setAnalyzingIndex(index);
+      setAnalysisResult(null);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+      // Read image as base64
+      const base64 = await FileSystem.readAsStringAsync(photo.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      const ext = photo.uri.toLowerCase();
+      const mimeType = ext.endsWith('.png') ? 'image/png' : 'image/jpeg';
+      const imageBase64 = `data:${mimeType};base64,${base64}`;
+
+      const result = await api.post<MeasurementAnalysis>('/api/measurements/analyze', {
+        imageBase64,
+        heightCm: height,
+      });
+
+      setAnalysisResult(result);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (e) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert('Analysis Failed', 'Could not analyse the photo. Please try again.');
+    } finally {
+      setAnalyzingIndex(null);
     }
   };
 
@@ -206,7 +253,7 @@ export default function TryOnScreen() {
 
               {/* Imported Photos Grid */}
               {importedPhotos.length > 0 && (
-                <View style={{ marginBottom: 36 }}>
+                <View style={{ marginBottom: 28 }}>
                   <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, marginBottom: 12 }}>
                     IMPORTED ({importedPhotos.length})
                   </Text>
@@ -240,16 +287,152 @@ export default function TryOnScreen() {
                         >
                           <X size={13} color="#F5F0E8" strokeWidth={2} />
                         </Pressable>
-                        {/* Name label */}
-                        <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.6)', padding: 8 }}>
-                          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 10, color: '#F5F0E8' }} numberOfLines={1}>
+                        {/* Bottom overlay with name + Analyse button */}
+                        <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.7)', padding: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 10, color: '#F5F0E8', flex: 1 }} numberOfLines={1}>
                             {photo.name}
                           </Text>
+                          <Pressable
+                            onPress={() => analyzePhoto(photo, index)}
+                            disabled={analyzingIndex !== null}
+                            testID={`analyse-button-${index}`}
+                            style={({ pressed }) => ({
+                              opacity: pressed ? 0.7 : analyzingIndex !== null ? 0.4 : 1,
+                              backgroundColor: 'rgba(201,169,110,0.9)',
+                              borderRadius: 8,
+                              paddingHorizontal: 8,
+                              paddingVertical: 4,
+                              marginLeft: 6,
+                            })}
+                          >
+                            {analyzingIndex === index ? (
+                              <ActivityIndicator size="small" color="#0A0A0A" />
+                            ) : (
+                              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 10, color: '#0A0A0A' }}>
+                                Analyse
+                              </Text>
+                            )}
+                          </Pressable>
                         </View>
                       </View>
                     ))}
                   </View>
                 </View>
+              )}
+
+              {/* Analysis Result Panel */}
+              {analysisResult !== null && (
+                <Animated.View entering={nativeEntering(FadeInDown.duration(400))} style={{ marginBottom: 28 }}>
+                  {/* Header row */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2 }}>
+                        AI MEASUREMENTS
+                      </Text>
+                      {/* Confidence badge */}
+                      <View style={{
+                        paddingHorizontal: 8,
+                        paddingVertical: 3,
+                        borderRadius: 10,
+                        backgroundColor: analysisResult.confidence === 'high' ? 'rgba(76,175,80,0.15)' : analysisResult.confidence === 'medium' ? 'rgba(255,152,0,0.15)' : 'rgba(244,67,54,0.15)',
+                        borderWidth: 1,
+                        borderColor: analysisResult.confidence === 'high' ? 'rgba(76,175,80,0.4)' : analysisResult.confidence === 'medium' ? 'rgba(255,152,0,0.4)' : 'rgba(244,67,54,0.4)',
+                      }}>
+                        <Text style={{
+                          fontFamily: 'DMSans_500Medium',
+                          fontSize: 9,
+                          letterSpacing: 1,
+                          color: analysisResult.confidence === 'high' ? '#4CAF50' : analysisResult.confidence === 'medium' ? '#FF9800' : '#F44336',
+                        }}>
+                          {analysisResult.confidence.toUpperCase()} CONFIDENCE
+                        </Text>
+                      </View>
+                    </View>
+                    <Pressable
+                      onPress={() => setAnalysisResult(null)}
+                      style={{ padding: 4 }}
+                      testID="close-analysis-button"
+                    >
+                      <X size={14} color="#A89880" />
+                    </Pressable>
+                  </View>
+
+                  {/* Measurement grid */}
+                  <View style={{ backgroundColor: '#161616', borderRadius: 16, borderWidth: 1, borderColor: '#2A2A2A', overflow: 'hidden', marginBottom: 12 }}>
+                    <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#2A2A2A' }}>
+                      {[
+                        { label: 'CHEST', value: analysisResult.chest },
+                        { label: 'WAIST', value: analysisResult.waist },
+                        { label: 'HIPS', value: analysisResult.hips },
+                      ].map((m, i) => (
+                        <View key={m.label} style={{ flex: 1, padding: 16, alignItems: 'center', borderRightWidth: i < 2 ? 1 : 0, borderRightColor: '#2A2A2A' }}>
+                          <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 9, color: '#A89880', letterSpacing: 1.5, marginBottom: 4 }}>
+                            {m.label}
+                          </Text>
+                          <Text style={{ fontFamily: 'CormorantGaramond_700Bold', fontSize: 22, color: '#C9A96E' }}>
+                            {m.value}
+                          </Text>
+                          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 9, color: '#A89880' }}>cm</Text>
+                        </View>
+                      ))}
+                    </View>
+                    <View style={{ flexDirection: 'row' }}>
+                      {[
+                        { label: 'SHOULDER', value: analysisResult.shoulder },
+                        { label: 'INSEAM', value: analysisResult.inseam },
+                      ].map((m, i) => (
+                        <View key={m.label} style={{ flex: 1, padding: 16, alignItems: 'center', borderRightWidth: i < 1 ? 1 : 0, borderRightColor: '#2A2A2A' }}>
+                          <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 9, color: '#A89880', letterSpacing: 1.5, marginBottom: 4 }}>
+                            {m.label}
+                          </Text>
+                          <Text style={{ fontFamily: 'CormorantGaramond_700Bold', fontSize: 22, color: '#C9A96E' }}>
+                            {m.value}
+                          </Text>
+                          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 9, color: '#A89880' }}>cm</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+
+                  {/* AI Notes */}
+                  {analysisResult.notes ? (
+                    <View style={{ backgroundColor: '#161616', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#2A2A2A', marginBottom: 12 }}>
+                      <Text style={{ fontFamily: 'CormorantGaramond_400Regular_Italic', fontSize: 14, color: '#A89880', lineHeight: 20 }}>
+                        "{analysisResult.notes}"
+                      </Text>
+                    </View>
+                  ) : null}
+
+                  {/* Save to profile button */}
+                  <Pressable
+                    testID="save-measurements-button"
+                    onPress={() => {
+                      setProfile({
+                        measurements: {
+                          chest: analysisResult.chest,
+                          waist: analysisResult.waist,
+                          hips: analysisResult.hips,
+                          shoulder: analysisResult.shoulder,
+                          inseam: analysisResult.inseam,
+                        },
+                        hasCompletedProfile: true,
+                      });
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      Alert.alert('Saved', 'Measurements saved to your fit profile.');
+                      setAnalysisResult(null);
+                    }}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
+                  >
+                    <LinearGradient
+                      colors={['#C9A96E', '#A07840']}
+                      style={{ height: 50, borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 13, color: '#0A0A0A', letterSpacing: 1.5 }}>
+                        SAVE TO FIT PROFILE
+                      </Text>
+                    </LinearGradient>
+                  </Pressable>
+                </Animated.View>
               )}
 
               {/* Recent imports */}

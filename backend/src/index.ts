@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import "./env";
 import { sampleRouter } from "./routes/sample";
+import { measurementsRouter } from "./routes/measurements";
 import { logger } from "hono/logger";
 import { auth } from "./auth";
 
@@ -66,6 +67,7 @@ app.get("/api/me", (c) => {
 
 // Routes
 app.route("/api/sample", sampleRouter);
+app.route("/api/measurements", measurementsRouter);
 
 const port = Number(process.env.PORT) || 3000;
 

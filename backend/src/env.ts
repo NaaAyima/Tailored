@@ -11,6 +11,7 @@ const envSchema = z.object({
   BACKEND_URL: z.string().default("http://localhost:3000"),
   DATABASE_URL: z.string().default("file:./dev.db"),
   BETTER_AUTH_SECRET: z.string().min(1, "BETTER_AUTH_SECRET is required"),
+  OPENAI_API_KEY: z.string().min(1, "OPENAI_API_KEY is required"),
 });
 
 /**
