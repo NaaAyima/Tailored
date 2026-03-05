@@ -85,6 +85,8 @@ export default function ProfileSetupScreen() {
           chest: parseFloat(chest) || 0,
           waist: parseFloat(waist) || 0,
           hips: parseFloat(hips) || 0,
+          shoulder: 0,
+          inseam: 0,
         },
         hasCompletedProfile: true,
       });

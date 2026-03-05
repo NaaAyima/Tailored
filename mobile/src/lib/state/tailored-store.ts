@@ -18,7 +18,7 @@ interface TailoredStore {
   height: number; // cm
   weight: number; // kg
   bodyType: "ectomorph" | "mesomorph" | "endomorph" | null;
-  measurements: { chest: number; waist: number; hips: number };
+  measurements: { chest: number; waist: number; hips: number; shoulder: number; inseam: number };
   hasCompletedProfile: boolean;
   hasCompletedOnboarding: boolean;
   setProfile: (data: Partial<Omit<TailoredStore, "setProfile" | "addItem" | "toggleStylePreference">>) => void;
@@ -40,7 +40,7 @@ const useTailoredStore = create<TailoredStore>()(
       height: 175,
       weight: 70,
       bodyType: null,
-      measurements: { chest: 0, waist: 0, hips: 0 },
+      measurements: { chest: 0, waist: 0, hips: 0, shoulder: 0, inseam: 0 },
       hasCompletedProfile: false,
       hasCompletedOnboarding: false,
 

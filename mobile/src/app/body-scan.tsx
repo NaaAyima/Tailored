@@ -331,77 +331,79 @@ function NativeCaptureStep({
 
   return (
     <View style={{ flex: 1, position: 'relative' }}>
-      <NativeCamView ref={cameraRef} style={{ flex: 1 }} facing="front">
-        <BodySilhouetteOverlay />
-        <CornerBrackets />
+      {/* Camera — no children */}
+      <NativeCamView ref={cameraRef} style={{ flex: 1 }} facing="front" />
 
-        {/* Top bar */}
-        <SafeAreaView style={{ position: 'absolute', top: 0, left: 0, right: 0 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 8 }}>
-            <Pressable
-              onPress={onBack}
-              testID="camera-back-button"
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.6 : 1,
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: 12,
-              })}
-            >
-              <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 18, color: '#F5F0E8' }}>←</Text>
-            </Pressable>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: 'CormorantGaramond_700Bold', fontSize: 22, color: '#F5F0E8' }}>{title}</Text>
-              <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: 'rgba(245,240,232,0.7)', lineHeight: 16 }}>{instruction}</Text>
-            </View>
-            <View style={{ backgroundColor: 'rgba(201,169,110,0.2)', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5, borderWidth: 1, borderColor: 'rgba(201,169,110,0.5)' }}>
-              <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 11, color: '#C9A96E' }}>{stepIndex} / 2</Text>
-            </View>
-          </View>
-        </SafeAreaView>
+      {/* All overlays rendered as siblings, absolutely positioned */}
+      <BodySilhouetteOverlay />
+      <CornerBrackets />
 
-        {/* Countdown */}
-        {countdown !== null ? (
-          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }} pointerEvents="none">
-            <Text style={{ fontFamily: 'CormorantGaramond_700Bold_Italic', fontSize: 120, color: 'rgba(201,169,110,0.9)' }}>
-              {countdown}
-            </Text>
-          </View>
-        ) : null}
-
-        {/* Flash */}
-        <Animated.View
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'white', opacity: flashAnim }}
-          pointerEvents="none"
-        />
-
-        {/* Bottom shutter panel */}
-        <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.6)', paddingTop: 24, paddingBottom: 48, alignItems: 'center' }}>
-          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: 'rgba(245,240,232,0.7)', marginBottom: 20, textAlign: 'center', paddingHorizontal: 40 }}>
-            {instruction}
-          </Text>
+      {/* Top bar */}
+      <SafeAreaView style={{ position: 'absolute', top: 0, left: 0, right: 0 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 8 }}>
           <Pressable
-            onPress={handleShutter}
-            testID="shutter-button"
+            onPress={onBack}
+            testID="camera-back-button"
             style={({ pressed }) => ({
-              opacity: pressed ? 0.85 : 1,
-              width: 80,
-              height: 80,
-              borderRadius: 40,
-              borderWidth: 3,
-              borderColor: '#C9A96E',
+              opacity: pressed ? 0.6 : 1,
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: 'rgba(0,0,0,0.5)',
               alignItems: 'center',
               justifyContent: 'center',
+              marginRight: 12,
             })}
           >
-            <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: 'white' }} />
+            <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 18, color: '#F5F0E8' }}>←</Text>
           </Pressable>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontFamily: 'CormorantGaramond_700Bold', fontSize: 22, color: '#F5F0E8' }}>{title}</Text>
+            <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: 'rgba(245,240,232,0.7)', lineHeight: 16 }}>{instruction}</Text>
+          </View>
+          <View style={{ backgroundColor: 'rgba(201,169,110,0.2)', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5, borderWidth: 1, borderColor: 'rgba(201,169,110,0.5)' }}>
+            <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 11, color: '#C9A96E' }}>{stepIndex} / 2</Text>
+          </View>
         </View>
-      </NativeCamView>
+      </SafeAreaView>
+
+      {/* Countdown */}
+      {countdown !== null ? (
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }} pointerEvents="none">
+          <Text style={{ fontFamily: 'CormorantGaramond_700Bold_Italic', fontSize: 120, color: 'rgba(201,169,110,0.9)' }}>
+            {countdown}
+          </Text>
+        </View>
+      ) : null}
+
+      {/* Flash */}
+      <Animated.View
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'white', opacity: flashAnim }}
+        pointerEvents="none"
+      />
+
+      {/* Bottom shutter panel */}
+      <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.6)', paddingTop: 24, paddingBottom: 48, alignItems: 'center' }}>
+        <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: 'rgba(245,240,232,0.7)', marginBottom: 20, textAlign: 'center', paddingHorizontal: 40 }}>
+          {instruction}
+        </Text>
+        <Pressable
+          onPress={handleShutter}
+          testID="shutter-button"
+          style={({ pressed }) => ({
+            opacity: pressed ? 0.85 : 1,
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            borderWidth: 3,
+            borderColor: '#C9A96E',
+            alignItems: 'center',
+            justifyContent: 'center',
+          })}
+        >
+          <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: 'white' }} />
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -620,6 +622,8 @@ export default function BodyScanScreen() {
         chest: measurements.chest,
         waist: measurements.waist,
         hips: measurements.hips,
+        shoulder: measurements.shoulders,
+        inseam: measurements.inseam,
       },
       hasCompletedProfile: true,
     });

@@ -12,10 +12,12 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
 import { ChevronRight, Bell, Shield, Ruler, Info, LogOut } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 
 const STYLE_PREFS = ['Minimalist', 'Streetwear', 'Formal', 'Casual', 'Athletic', 'Avant-garde'];
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const userName = useTailoredStore((s) => s.userName);
   const height = useTailoredStore((s) => s.height);
   const weight = useTailoredStore((s) => s.weight);
@@ -115,11 +117,23 @@ export default function ProfileScreen() {
 
           {/* Measurements Card */}
           <Animated.View entering={nativeEntering(FadeInDown.delay(150).duration(500))} style={{ paddingHorizontal: 24, marginBottom: 28 }}>
-            <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2, marginBottom: 12 }}>
-              MEASUREMENTS
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 11, color: '#A89880', letterSpacing: 2 }}>
+                MEASUREMENTS
+              </Text>
+              <Pressable
+                testID="edit-measurements-button"
+                onPress={() => { Haptics.selectionAsync(); router.push('/measurements-edit'); }}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+              >
+                <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: '#C9A96E' }}>
+                  Edit
+                </Text>
+              </Pressable>
+            </View>
             <View style={{ backgroundColor: '#161616', borderRadius: 16, borderWidth: 1, borderColor: '#2A2A2A', overflow: 'hidden' }}>
-              <View style={{ flexDirection: 'row' }}>
+              {/* Row 1: Chest, Waist, Hips */}
+              <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#2A2A2A' }}>
                 {[
                   { label: 'CHEST', value: measurements.chest > 0 ? `${measurements.chest} cm` : '—' },
                   { label: 'WAIST', value: measurements.waist > 0 ? `${measurements.waist} cm` : '—' },
@@ -131,6 +145,31 @@ export default function ProfileScreen() {
                       flex: 1,
                       padding: 18,
                       borderRightWidth: i < 2 ? 1 : 0,
+                      borderRightColor: '#2A2A2A',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 9, color: '#A89880', letterSpacing: 1.5, marginBottom: 6 }}>
+                      {m.label}
+                    </Text>
+                    <Text style={{ fontFamily: 'CormorantGaramond_600SemiBold', fontSize: 18, color: '#F5F0E8' }}>
+                      {m.value}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+              {/* Row 2: Shoulder, Inseam */}
+              <View style={{ flexDirection: 'row' }}>
+                {[
+                  { label: 'SHOULDER', value: measurements.shoulder > 0 ? `${measurements.shoulder} cm` : '—' },
+                  { label: 'INSEAM', value: measurements.inseam > 0 ? `${measurements.inseam} cm` : '—' },
+                ].map((m, i) => (
+                  <View
+                    key={m.label}
+                    style={{
+                      flex: 1,
+                      padding: 18,
+                      borderRightWidth: i < 1 ? 1 : 0,
                       borderRightColor: '#2A2A2A',
                       alignItems: 'center',
                     }}
