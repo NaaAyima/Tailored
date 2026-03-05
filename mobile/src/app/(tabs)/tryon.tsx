@@ -62,7 +62,7 @@ export default function TryOnScreen() {
   const [urlInput, setUrlInput] = useState<string>('');
   const [importedPhotos, setImportedPhotos] = useState<ImportedPhoto[]>([]);
   const [analysisResult, setAnalysisResult] = useState<MeasurementAnalysis | null>(null);
-  const [analyzingIndex, setAnalyzingIndex] = useState<number | null>(null);
+  const [analyzingId, setAnalyzingId] = useState<string | null>(null);
 
   const savedItems = useTailoredStore((s) => s.savedItems);
   const height = useTailoredStore((s) => s.height);
@@ -109,9 +109,9 @@ export default function TryOnScreen() {
     }
   };
 
-  const analyzePhoto = async (photo: ImportedPhoto, index: number) => {
+  const analyzePhoto = async (photo: ImportedPhoto) => {
     try {
-      setAnalyzingIndex(index);
+      setAnalyzingId(photo.id);
       setAnalysisResult(null);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
@@ -134,7 +134,7 @@ export default function TryOnScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert('Analysis Failed', 'Could not analyse the photo. Please try again.');
     } finally {
-      setAnalyzingIndex(null);
+      setAnalyzingId(null);
     }
   };
 
@@ -295,11 +295,11 @@ export default function TryOnScreen() {
                             {photo.name}
                           </Text>
                           <Pressable
-                            onPress={() => analyzePhoto(photo, index)}
-                            disabled={analyzingIndex !== null}
+                            onPress={() => analyzePhoto(photo)}
+                            disabled={analyzingId !== null}
                             testID={`analyse-button-${index}`}
                             style={({ pressed }) => ({
-                              opacity: pressed ? 0.7 : analyzingIndex !== null ? 0.4 : 1,
+                              opacity: pressed ? 0.7 : analyzingId !== null ? 0.4 : 1,
                               backgroundColor: 'rgba(201,169,110,0.9)',
                               borderRadius: 8,
                               paddingHorizontal: 8,
@@ -307,7 +307,7 @@ export default function TryOnScreen() {
                               marginLeft: 6,
                             })}
                           >
-                            {analyzingIndex === index ? (
+                            {analyzingId === photo.id ? (
                               <ActivityIndicator size="small" color="#0A0A0A" />
                             ) : (
                               <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 10, color: '#0A0A0A' }}>
@@ -478,6 +478,30 @@ export default function TryOnScreen() {
                           </Text>
                         </View>
                         <Pressable
+                          onPress={() => analyzePhoto(photo)}
+                          disabled={analyzingId !== null}
+                          style={({ pressed }) => ({
+                            opacity: pressed ? 0.7 : analyzingId !== null ? 0.4 : 1,
+                            backgroundColor: 'rgba(201,169,110,0.15)',
+                            borderRadius: 8,
+                            paddingHorizontal: 10,
+                            paddingVertical: 6,
+                            marginLeft: 8,
+                            borderWidth: 1,
+                            borderColor: 'rgba(201,169,110,0.4)',
+                            minWidth: 64,
+                            alignItems: 'center',
+                          })}
+                        >
+                          {analyzingId === photo.id ? (
+                            <ActivityIndicator size="small" color="#C9A96E" />
+                          ) : (
+                            <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 10, color: '#C9A96E' }}>
+                              Analyse
+                            </Text>
+                          )}
+                        </Pressable>
+                        <Pressable
                           onPress={() => {
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             removeImportedPhoto(photo.id);
@@ -491,7 +515,7 @@ export default function TryOnScreen() {
                             justifyContent: 'center',
                             borderWidth: 1,
                             borderColor: '#2A2A2A',
-                            marginLeft: 8,
+                            marginLeft: 6,
                           }}
                           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                         >
