@@ -53,7 +53,7 @@ Rules:
           role: "user",
           content: [
             { type: "input_text", text: prompt },
-            { type: "input_image", image_url: imageBase64 },
+            { type: "input_image", image_url: { url: imageBase64 } },
           ],
         },
       ],
@@ -62,7 +62,7 @@ Rules:
 
   if (!response.ok) {
     const err = await response.text();
-    console.error("OpenAI error:", err);
+    console.error("OpenAI error:", response.status, err);
     return c.json({ error: { message: "AI analysis failed", code: "AI_ERROR" } }, 500);
   }
 

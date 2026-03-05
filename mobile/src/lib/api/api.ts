@@ -22,11 +22,14 @@ const request = async <T>(
     return undefined as T;
   }
 
-  // 2. JSON responses: parse and unwrap { data }
+  // 2. JSON responses: parse, throw on error, unwrap { data }
   const contentType = response.headers.get("content-type");
   if (contentType?.includes("application/json")) {
-    const json = await response.json() as { data: T };
-    return json.data;
+    const json = await response.json() as { data?: T; error?: { message: string; code: string } };
+    if (!response.ok || json.error) {
+      throw new Error(json.error?.message ?? `Request failed with status ${response.status}`);
+    }
+    return json.data as T;
   }
 
   // 3. Non-JSON: return undefined
