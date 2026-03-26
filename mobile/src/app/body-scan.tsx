@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Camera, Lock, CheckCircle, RefreshCw } from 'lucide-react-native';
+import { Camera, Lock, CheckCircle, RefreshCw, SwitchCamera } from 'lucide-react-native';
 import useTailoredStore from '@/lib/state/tailored-store';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -274,6 +274,7 @@ function NativeCaptureStep({
   // Hook is always called — no conditional
   const [, requestPerm] = useCameraPermissions();
 
+  const [facing, setFacing] = useState<'front' | 'back'>('front');
   const [countdown, setCountdown] = useState<number | null>(null);
   const flashAnim = useRef(new Animated.Value(0)).current;
   // Use any so we avoid the complex generic mismatch; we call a known method
@@ -332,7 +333,7 @@ function NativeCaptureStep({
   return (
     <View style={{ flex: 1, position: 'relative' }}>
       {/* Camera — no children */}
-      <NativeCamView ref={cameraRef} style={{ flex: 1 }} facing="front" />
+      <NativeCamView ref={cameraRef} style={{ flex: 1 }} facing={facing} />
 
       {/* All overlays rendered as siblings, absolutely positioned */}
       <BodySilhouetteOverlay />
@@ -387,22 +388,44 @@ function NativeCaptureStep({
         <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: 'rgba(245,240,232,0.7)', marginBottom: 20, textAlign: 'center', paddingHorizontal: 40 }}>
           {instruction}
         </Text>
-        <Pressable
-          onPress={handleShutter}
-          testID="shutter-button"
-          style={({ pressed }) => ({
-            opacity: pressed ? 0.85 : 1,
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            borderWidth: 3,
-            borderColor: '#C9A96E',
-            alignItems: 'center',
-            justifyContent: 'center',
-          })}
-        >
-          <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: 'white' }} />
-        </Pressable>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 32 }}>
+          {/* Spacer to balance the flip button on the right */}
+          <View style={{ width: 52, height: 52 }} />
+          <Pressable
+            onPress={handleShutter}
+            testID="shutter-button"
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.85 : 1,
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              borderWidth: 3,
+              borderColor: '#C9A96E',
+              alignItems: 'center',
+              justifyContent: 'center',
+            })}
+          >
+            <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: 'white' }} />
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              setFacing((prev) => (prev === 'front' ? 'back' : 'front'));
+              Haptics.selectionAsync();
+            }}
+            testID="flip-camera-button"
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.7 : 1,
+              width: 52,
+              height: 52,
+              borderRadius: 26,
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              alignItems: 'center',
+              justifyContent: 'center',
+            })}
+          >
+            <SwitchCamera size={22} color="#F5F0E8" />
+          </Pressable>
+        </View>
       </View>
     </View>
   );
