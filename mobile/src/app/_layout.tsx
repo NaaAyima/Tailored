@@ -21,7 +21,6 @@ import {
 import { useEffect } from 'react';
 import { useSession } from '@/lib/auth/use-session';
 import useTailoredStore from '@/lib/state/tailored-store';
-import { useRouter } from 'expo-router';
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
@@ -34,7 +33,6 @@ const queryClient = new QueryClient();
 function RootLayoutNav() {
   const { data: session, isLoading } = useSession();
   const setProfile = useTailoredStore((s: ReturnType<typeof useTailoredStore.getState>) => s.setProfile);
-  const router = useRouter();
 
   useEffect(() => {
     const name = session?.user?.name;
@@ -43,14 +41,10 @@ function RootLayoutNav() {
     }
   }, [session?.user?.name]);
 
-  // Redirect new users (signed in but no name set) to enter-name screen
-  useEffect(() => {
-    if (!isLoading && session?.user && !session.user.name) {
-      router.replace('/enter-name' as never);
-    }
-  }, [isLoading, session?.user?.name]);
-
   if (isLoading) return null;
+
+  const isSignedIn = !!session?.user;
+  const hasName = !!session?.user?.name;
 
   return (
     <>
@@ -62,8 +56,8 @@ function RootLayoutNav() {
           animation: 'fade',
         }}
       >
-        <Stack.Protected guard={!!session?.user}>
-          <Stack.Screen name="enter-name" options={{ headerShown: false, animation: 'fade' }} />
+        {/* Signed in + has name → main app */}
+        <Stack.Protected guard={isSignedIn ? hasName : false}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="profile-setup" options={{ headerShown: false, animation: 'slide_from_right' }} />
           <Stack.Screen
@@ -84,7 +78,13 @@ function RootLayoutNav() {
           <Stack.Screen name="customer-add-garment" options={{ headerShown: false, animation: 'slide_from_right' }} />
         </Stack.Protected>
 
-        <Stack.Protected guard={!session?.user}>
+        {/* Signed in but no name → ask for name */}
+        <Stack.Protected guard={isSignedIn ? !hasName : false}>
+          <Stack.Screen name="enter-name" options={{ headerShown: false, animation: 'fade' }} />
+        </Stack.Protected>
+
+        {/* Not signed in → auth flow */}
+        <Stack.Protected guard={!isSignedIn}>
           <Stack.Screen name="sign-in" options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="verify-otp" options={{ headerShown: false, animation: 'slide_from_right' }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade' }} />
