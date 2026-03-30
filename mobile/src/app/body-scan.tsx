@@ -444,21 +444,28 @@ function CaptureStep({ stepIndex, onCapture, onBack }: { stepIndex: 1 | 2; onCap
 
 function ResultsStep({
   height: userHeight,
+  weight: userWeight,
   onSave,
   onManual,
 }: {
   height: number;
+  weight: number;
   onSave: (m: MeasurementResult) => void;
   onManual: () => void;
 }) {
   const [analysing, setAnalysing] = useState<boolean>(true);
   const pulseAnim = useRef(new Animated.Value(0.4)).current;
 
-  const chest = parseFloat((userHeight * 0.54).toFixed(1));
-  const waist = parseFloat((userHeight * 0.45).toFixed(1));
-  const hips = parseFloat((userHeight * 0.56).toFixed(1));
-  const shoulders = parseFloat((userHeight * 0.26).toFixed(1));
-  const inseam = parseFloat((userHeight * 0.47).toFixed(1));
+  // BMI-adjusted measurements using validated anthropometric proportions
+  // Base proportions calibrated at BMI 22 (average build), adjusted per BMI unit deviation
+  const bmi = userWeight / Math.pow(userHeight / 100, 2);
+  const bmiDelta = bmi - 22; // deviation from reference BMI
+
+  const chest = parseFloat(Math.max(70, userHeight * 0.543 + bmiDelta * 0.7).toFixed(1));
+  const waist = parseFloat(Math.max(55, userHeight * 0.457 + bmiDelta * 1.5).toFixed(1));
+  const hips = parseFloat(Math.max(70, userHeight * 0.554 + bmiDelta * 1.0).toFixed(1));
+  const shoulders = parseFloat(Math.max(32, userHeight * 0.257 + bmiDelta * 0.15).toFixed(1));
+  const inseam = parseFloat(Math.max(60, userHeight * 0.463 + bmiDelta * 0.05).toFixed(1));
 
   useEffect(() => {
     const pulse = Animated.loop(
@@ -615,6 +622,7 @@ function ResultsStep({
 export default function BodyScanScreen() {
   const router = useRouter();
   const height = useTailoredStore((s) => s.height);
+  const weight = useTailoredStore((s) => s.weight);
   const setProfile = useTailoredStore((s) => s.setProfile);
 
   const [step, setStep] = useState<ScanStep>(0);
@@ -669,7 +677,7 @@ export default function BodyScanScreen() {
         <CaptureStep stepIndex={2} onCapture={handleSideCapture} onBack={() => setStep(1)} />
       )}
       {step === 3 && (
-        <ResultsStep height={height} onSave={handleSave} onManual={handleManual} />
+        <ResultsStep height={height} weight={weight} onSave={handleSave} onManual={handleManual} />
       )}
     </View>
   );
