@@ -13,6 +13,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { nativeEntering } from '@/lib/entering';
 import useTailoredStore from '@/lib/state/tailored-store';
 import { Bell, Shirt } from 'lucide-react-native';
+import { useSession } from '@/lib/auth/use-session';
 import { ClothingItem } from '@/lib/state/tailored-store';
 
 function fitScoreColor(score: number): string {
@@ -132,6 +133,7 @@ function RecommendedCard({ item, onPress }: { item: ClothingItem; onPress: () =>
 export default function DiscoverScreen() {
   const router = useRouter();
   const userName = useTailoredStore((s) => s.userName);
+  const { data: session } = useSession();
   const savedItems = useTailoredStore((s) => s.savedItems);
 
   const hour = new Date().getHours();
@@ -159,7 +161,7 @@ export default function DiscoverScreen() {
                 {greeting}
               </Text>
               <Text style={{ fontFamily: 'CormorantGaramond_700Bold', fontSize: 26, color: '#F5F0E8' }}>
-                {userName}
+                {session?.user?.name ?? userName}
               </Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
