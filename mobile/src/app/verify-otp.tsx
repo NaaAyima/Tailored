@@ -19,7 +19,7 @@ import * as Haptics from 'expo-haptics';
 
 export default function VerifyOtpScreen() {
   const router = useRouter();
-  const { email } = useLocalSearchParams<{ email: string }>();
+  const { email, name } = useLocalSearchParams<{ email: string; name?: string }>();
   const invalidateSession = useInvalidateSession();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +40,11 @@ export default function VerifyOtpScreen() {
         setError(result.error.message ?? 'Invalid code. Please try again.');
         otpRef.current?.clear();
       } else {
+        // Save the name collected during sign-in
+        const trimmedName = name?.trim();
+        if (trimmedName) {
+          await authClient.updateUser({ name: trimmedName });
+        }
         await invalidateSession();
         // Stack.Protected handles navigation automatically
       }

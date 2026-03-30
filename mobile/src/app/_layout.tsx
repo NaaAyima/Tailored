@@ -44,7 +44,6 @@ function RootLayoutNav() {
   if (isLoading) return null;
 
   const isSignedIn = !!session?.user;
-  const hasName = !!session?.user?.name;
 
   return (
     <>
@@ -56,8 +55,8 @@ function RootLayoutNav() {
           animation: 'fade',
         }}
       >
-        {/* Signed in + has name → main app */}
-        <Stack.Protected guard={isSignedIn ? hasName : false}>
+        {/* Signed in → main app */}
+        <Stack.Protected guard={isSignedIn}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="profile-setup" options={{ headerShown: false, animation: 'slide_from_right' }} />
           <Stack.Screen
@@ -76,11 +75,6 @@ function RootLayoutNav() {
           <Stack.Screen name="customer-edit" options={{ headerShown: false, animation: 'slide_from_right' }} />
           <Stack.Screen name="customer-detail" options={{ headerShown: false, animation: 'slide_from_right' }} />
           <Stack.Screen name="customer-add-garment" options={{ headerShown: false, animation: 'slide_from_right' }} />
-        </Stack.Protected>
-
-        {/* Signed in but no name → ask for name */}
-        <Stack.Protected guard={isSignedIn ? !hasName : false}>
-          <Stack.Screen name="enter-name" options={{ headerShown: false, animation: 'fade' }} />
         </Stack.Protected>
 
         {/* Not signed in → auth flow */}
