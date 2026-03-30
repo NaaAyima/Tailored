@@ -20,6 +20,7 @@ import {
 } from '@expo-google-fonts/dm-sans';
 import { useEffect } from 'react';
 import { useSession } from '@/lib/auth/use-session';
+import useTailoredStore from '@/lib/state/tailored-store';
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
@@ -31,6 +32,14 @@ const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   const { data: session, isLoading } = useSession();
+  const setProfile = useTailoredStore((s: ReturnType<typeof useTailoredStore.getState>) => s.setProfile);
+
+  useEffect(() => {
+    const name = session?.user?.name;
+    if (name) {
+      setProfile({ userName: name });
+    }
+  }, [session?.user?.name]);
 
   if (isLoading) return null;
 
