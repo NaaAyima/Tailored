@@ -8,6 +8,7 @@ import {
   Platform,
   ActivityIndicator,
   ScrollView,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -117,23 +118,17 @@ export default function SignInScreen() {
               entering={nativeEntering(FadeInDown.delay(0).duration(700))}
               style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 40, paddingBottom: 48 }}
             >
-              <Text
-                style={{
-                  fontFamily: 'CormorantGaramond_700Bold_Italic',
-                  fontSize: 56,
-                  color: '#F5F0E8',
-                  letterSpacing: 2,
-                  textAlign: 'center',
-                }}
-              >
-                Tailored
-              </Text>
+              <Image
+                source={require('../assets/logo.jpg')}
+                style={{ width: 190, height: 190, borderRadius: 20 }}
+                resizeMode="contain"
+              />
               <Text
                 style={{
                   fontFamily: 'CormorantGaramond_400Regular_Italic',
                   fontSize: 18,
                   color: '#C9A96E',
-                  marginTop: 8,
+                  marginTop: 20,
                   textAlign: 'center',
                 }}
               >
@@ -144,7 +139,7 @@ export default function SignInScreen() {
                   width: 40,
                   height: 1,
                   backgroundColor: '#C9A96E',
-                  marginTop: 20,
+                  marginTop: 16,
                   opacity: 0.8,
                 }}
               />

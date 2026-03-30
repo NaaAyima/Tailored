@@ -7,6 +7,7 @@ import {
   ScrollView,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -134,9 +135,11 @@ export default function OnboardingScreen() {
                   />
                   {/* Brand mark */}
                   <View style={{ position: 'absolute', alignItems: 'center' }}>
-                    <Text style={{ fontFamily: 'CormorantGaramond_400Regular_Italic', fontSize: 18, color: '#C9A96E', letterSpacing: 6, opacity: 0.9 }}>
-                      TAILORED
-                    </Text>
+                    <Image
+                      source={require('../assets/logo.jpg')}
+                      style={{ width: 140, height: 140, borderRadius: 16, opacity: 0.92 }}
+                      resizeMode="contain"
+                    />
                   </View>
                 </View>
 
