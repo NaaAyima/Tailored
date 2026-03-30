@@ -21,6 +21,7 @@ import {
 import { useEffect } from 'react';
 import { useSession } from '@/lib/auth/use-session';
 import useTailoredStore from '@/lib/state/tailored-store';
+import { useRouter } from 'expo-router';
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
@@ -33,6 +34,7 @@ const queryClient = new QueryClient();
 function RootLayoutNav() {
   const { data: session, isLoading } = useSession();
   const setProfile = useTailoredStore((s: ReturnType<typeof useTailoredStore.getState>) => s.setProfile);
+  const router = useRouter();
 
   useEffect(() => {
     const name = session?.user?.name;
@@ -40,6 +42,13 @@ function RootLayoutNav() {
       setProfile({ userName: name });
     }
   }, [session?.user?.name]);
+
+  // Redirect new users (signed in but no name set) to enter-name screen
+  useEffect(() => {
+    if (!isLoading && session?.user && !session.user.name) {
+      router.replace('/enter-name' as never);
+    }
+  }, [isLoading, session?.user?.name]);
 
   if (isLoading) return null;
 
@@ -54,6 +63,7 @@ function RootLayoutNav() {
         }}
       >
         <Stack.Protected guard={!!session?.user}>
+          <Stack.Screen name="enter-name" options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="profile-setup" options={{ headerShown: false, animation: 'slide_from_right' }} />
           <Stack.Screen
